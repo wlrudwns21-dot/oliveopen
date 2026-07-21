@@ -11,6 +11,13 @@ import { IcBell, IcBag, IcSearch, IcCheck, IcChev, IcSun, IcCheckCircle, IcTruck
 
 export const dynamic = 'force-dynamic';
 
+// DB 설정(site_config)이 비어 있을 때 보여줄 기본 배너 — 디자인 프로토타입 3색 슬라이드
+const DEFAULT_SLIDES = [
+  { id: 's1', theme: 'green', eyebrow: 'Jeju Sun-ripened', title: '한 입에 퍼지는\n제주의 단맛', desc: '수확 당일 산지직송 · 평균 12 Brix⁺', cta: '지금 보기', link: '/product/gamgyul', image: '/assets/crop/gamgyul.png' },
+  { id: 's2', theme: 'cream', eyebrow: 'Dawn Auction Direct', title: '새벽 경매에서\n식탁까지, 단 3단계', desc: '중간 유통 마진 제로 · 정직한 가격', cta: '왜 올리브 오픈인가', link: '/brand', image: '/assets/crop/cherry.png' },
+  { id: 's3', theme: 'berry', eyebrow: "Today's Sweet", title: '톡 터지는\n보랏빛 건강 한 알', desc: '국내산 생블루베리 · 2차 정밀 선별', cta: '담으러 가기', link: '/category', image: '/assets/crop/blueberry.png' },
+];
+
 export default async function HomePage() {
   const [{ data: configs }, products, cartCount] = await Promise.all([
     db().from('site_config').select('config_key, config_value'),
@@ -18,6 +25,7 @@ export default async function HomePage() {
     getCartCount(),
   ]);
   const { conf, slides } = getSiteConf(configs);
+  const heroSlides = slides.length ? slides : DEFAULT_SLIDES;
   const text = conf['home_text'] || {};
   const banner = conf['home_banner'] || {};
   const session = getMemberSession();
@@ -55,7 +63,7 @@ export default async function HomePage() {
           </div>
 
           {/* hero carousel */}
-          <HeroCarousel slides={slides} />
+          <HeroCarousel slides={heroSlides} />
 
           {/* categories */}
           <section className="sec" style={{ paddingBottom: 0 }}>
