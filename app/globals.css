@@ -628,8 +628,9 @@ img{max-width:100%;}
 .aui .navlist a:hover{ background:rgba(255,255,255,.07); color:#fff; }
 .aui .navlist a.on{ background:var(--gold-bright); color:#112b18; box-shadow:0 8px 18px -10px rgba(0,0,0,.5); }
 .aui .side .foot{ padding:14px 16px 18px; border-top:1px solid rgba(255,255,255,.1); display:flex; flex-direction:column; gap:4px; }
-.aui .side .foot a, .aui .side .foot button{ display:flex; align-items:center; gap:9px; font-size:12.5px; color:#bcd3bf; font-weight:600; padding:8px 12px; border-radius:9px; text-align:left; }
+.aui .side .foot a, .aui .side .foot button{ display:flex; align-items:center; gap:8px; font-size:12.5px; color:#bcd3bf; font-weight:600; padding:8px 12px; border-radius:9px; text-align:left; }
 .aui .side .foot a:hover, .aui .side .foot button:hover{ background:rgba(255,255,255,.08); color:#fff; }
+.aui .side .foot svg{ width:15px; height:15px; flex:none; }
 .aui .main{ flex:1; min-width:0; }
 .aui .content{ padding:26px 30px 60px; max-width:1240px; width:100%; }
 .adm-head{ display:flex; align-items:center; gap:16px; margin-bottom:20px; flex-wrap:wrap; }

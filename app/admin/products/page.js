@@ -173,11 +173,11 @@ export default function AdminProducts() {
 
             <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>옵션 (첫 옵션 가격이 대표가로 저장돼요)</label>
             {options.map((o, i) => (
-              <div key={i} style={{ display: 'flex', gap: 6, margin: '6px 0' }}>
-                <input style={{ flex: 2 }} placeholder="옵션명" value={o.label} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
-                <input style={{ flex: 1 }} type="number" placeholder="판매가" value={o.price} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, price: e.target.value } : x))} />
-                <input style={{ flex: 1 }} type="number" placeholder="정상가" value={o.original_price ?? ''} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, original_price: e.target.value } : x))} />
-                <button className="btn btn-sm" style={{ color: 'var(--danger)' }} onClick={() => setOptions(options.filter((_, j) => j !== i))}>✕</button>
+              <div key={i} style={{ display: 'flex', gap: 6, margin: '6px 0', alignItems: 'center' }}>
+                <input style={{ flex: 2, minWidth: 0, width: '100%' }} placeholder="옵션명" value={o.label} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
+                <input style={{ flex: 1, minWidth: 0, width: '100%' }} type="number" placeholder="판매가" value={o.price} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, price: e.target.value } : x))} />
+                <input style={{ flex: 1, minWidth: 0, width: '100%' }} type="number" placeholder="정상가" value={o.original_price ?? ''} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, original_price: e.target.value } : x))} />
+                <button className="btn btn-sm" style={{ color: 'var(--danger)', flex: 'none', padding: '6px 8px' }} onClick={() => setOptions(options.filter((_, j) => j !== i))}>✕</button>
               </div>
             ))}
             <button className="btn btn-sm" style={{ border: '1px dashed var(--line)', width: '100%', marginTop: 4 }} onClick={() => setOptions([...options, { label: '', price: 0, original_price: '', sort_order: options.length }])}>+ 옵션 추가</button>
