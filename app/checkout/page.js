@@ -1,14 +1,20 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { won, SHIP_FREE, SHIP_FEE } from '@/lib/format';
+import { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { won } from '@/lib/format';
 import Toaster, { toast } from '@/components/Toaster';
 import AddressSearch from '@/components/AddressSearch';
 import { IcBack, IcCheck } from '@/components/icons';
 
-export default function CheckoutPage() {
+function CheckoutInner() {
   const router = useRouter();
+  const buyParam = useSearchParams().get('buy'); // "productPk-optionPk-qty" (바로구매)
+  const buynow = buyParam
+    ? (() => { const [p, o, q] = buyParam.split('-').map(Number); return { product_pk: p, product_option_pk: o || null, quantity: q || 1 }; })()
+    : null;
+
   const [lines, setLines] = useState(null);
+  const [shipping, setShipping] = useState({ freeThreshold: 30000, fee: 3000 });
   const [me, setMe] = useState(null);
   const [addr, setAddr] = useState({ recipient: '', phone: '', address: '', detail_address: '', zipcode: '' });
   const [editAddr, setEditAddr] = useState(false);
@@ -22,22 +28,43 @@ export default function CheckoutPage() {
   const [done, setDone] = useState(false);
   const [searching, setSearching] = useState(false);
 
-  useEffect(() => {
-    (async () => {
+  async function loadLines() {
+    if (buynow) {
+      const res = await fetch(`/api/order-line?product_pk=${buynow.product_pk}&option_pk=${buynow.product_option_pk || ''}&qty=${buynow.quantity}`);
+      if (res.status === 401) { router.push(`/login?next=/checkout?buy=${buyParam}`); return; }
+      const j = await res.json();
+      if (!res.ok) { toast(j.error || '상품을 불러올 수 없어요'); setLines([]); return; }
+      setLines([j.line]);
+      if (j.shipping) setShipping(j.shipping);
+    } else {
       const res = await fetch('/api/cart');
       if (res.status === 401) { router.push('/login?next=/checkout'); return; }
       const j = await res.json();
       setLines(j.lines || []);
+      if (j.shipping) setShipping(j.shipping);
+    }
+  }
+
+  useEffect(() => {
+    (async () => {
+      await loadLines();
       const m = await fetch('/api/auth/me').then((r) => r.json()).catch(() => null);
       if (m?.address) setAddr(m.address);
       if (m?.member) setMe(m.member);
     })();
   }, []);
 
+  async function removeLine(pk) {
+    await fetch('/api/cart', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pk }) });
+    if (coupon) { setCoupon(null); setCouponDc(0); } // 금액 바뀌므로 쿠폰 재적용 유도
+    loadLines();
+    router.refresh();
+  }
+
   const goods = (lines || []).reduce((a, l) => a + l.price * l.qty, 0);
   const wasGoods = (lines || []).reduce((a, l) => a + (l.was || l.price) * l.qty, 0);
   const itemDc = wasGoods - goods;
-  const fee = goods === 0 || goods >= SHIP_FREE ? 0 : SHIP_FEE;
+  const fee = goods === 0 || goods >= shipping.freeThreshold ? 0 : shipping.fee;
   const points = me?.points || 0;
   const pointUse = usePoint ? Math.min(points, Math.max(0, goods - couponDc)) : 0;
   const total = Math.max(0, goods + fee - couponDc - pointUse);
@@ -60,6 +87,7 @@ export default function CheckoutPage() {
       body: JSON.stringify({
         address: addr, delivery_request: memo || null, payment_method: pay,
         coupon_code: coupon?.code || null, use_points: usePoint,
+        buynow: buynow || undefined,
       }),
     });
     const j = await res.json();
@@ -76,7 +104,7 @@ export default function CheckoutPage() {
       <div className="phone pg-co">
         <header className="topbar">
           <button className="bk" aria-label="뒤로" onClick={() => router.back()}><IcBack /></button>
-          <h1>주문 / 결제</h1>
+          <h1>{buynow ? '바로 구매' : '주문 / 결제'}</h1>
         </header>
 
         {empty ? (
@@ -129,16 +157,24 @@ export default function CheckoutPage() {
               {/* 주문 상품 */}
               <div className="card">
                 <div className="ch"><div><span className="e">Items</span><h2>주문 상품 <span style={{ color: 'var(--green2)' }}>{(lines || []).length}개</span></h2></div></div>
-                {(lines || []).map((l) => (
-                  <div key={l.pk} className="citem">
+                {(lines || []).map((l, i) => (
+                  <div key={l.pk ?? `bn-${i}`} className="citem">
                     <div className="pic"><img src={l.img} alt={l.name} /></div>
                     <div className="b">
                       <div className="nm">{l.name}</div>
                       <div className="op">{l.option}</div>
                       <div className="pr"><span className="price">{won(l.price * l.qty)}원</span><span className="q">수량 {l.qty}개</span></div>
                     </div>
+                    {!buynow && (
+                      <button
+                        onClick={() => removeLine(l.pk)}
+                        aria-label="삭제"
+                        style={{ alignSelf: 'flex-start', color: '#aab0a0', fontSize: 18, fontWeight: 700, padding: '2px 4px', lineHeight: 1 }}
+                      >✕</button>
+                    )}
                   </div>
                 ))}
+                {buynow && <p style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 8 }}>🛍️ 바로 구매 — 장바구니와 별개로 이 상품만 결제됩니다.</p>}
               </div>
 
               {/* 할인 · 적립 */}
@@ -176,7 +212,7 @@ export default function CheckoutPage() {
                 <div className="ch"><div><span className="e">Total</span><h2>결제 금액</h2></div></div>
                 <div className="row"><span>상품 금액</span><span>{won(wasGoods)}원</span></div>
                 <div className="row"><span>상품 할인</span><span className="red">-{won(itemDc)}원</span></div>
-                <div className="row"><span>배송비</span><span>{fee === 0 ? '무료' : `${won(fee)}원`}</span></div>
+                <div className="row"><span>배송비 <span style={{ color: 'var(--muted)', fontWeight: 500, fontSize: 11 }}>({won(shipping.freeThreshold)}원↑ 무료)</span></span><span>{fee === 0 ? '무료' : `${won(fee)}원`}</span></div>
                 {coupon && <div className="row"><span>쿠폰 할인</span><span className="red">-{won(couponDc)}원</span></div>}
                 {usePoint && <div className="row"><span>적립금 사용</span><span className="red">-{won(pointUse)}원</span></div>}
                 <div className="row total"><span>총 결제금액</span><b>{won(total)}원</b></div>
@@ -223,4 +259,8 @@ export default function CheckoutPage() {
       </div>
     </div>
   );
+}
+
+export default function CheckoutPage() {
+  return <Suspense><CheckoutInner /></Suspense>;
 }

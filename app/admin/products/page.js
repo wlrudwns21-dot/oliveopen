@@ -171,16 +171,37 @@ export default function AdminProducts() {
               </label>
             </div>
 
-            <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>옵션 (첫 옵션 가격이 대표가로 저장돼요)</label>
-            {options.map((o, i) => (
-              <div key={i} style={{ display: 'flex', gap: 6, margin: '6px 0', alignItems: 'center' }}>
-                <input style={{ flex: 2, minWidth: 0, width: '100%' }} placeholder="옵션명" value={o.label} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, label: e.target.value } : x))} />
-                <input style={{ flex: 1, minWidth: 0, width: '100%' }} type="number" placeholder="판매가" value={o.price} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, price: e.target.value } : x))} />
-                <input style={{ flex: 1, minWidth: 0, width: '100%' }} type="number" placeholder="정상가" value={o.original_price ?? ''} onChange={(e) => setOptions(options.map((x, j) => j === i ? { ...x, original_price: e.target.value } : x))} />
-                <button className="btn btn-sm" style={{ color: 'var(--danger)', flex: 'none', padding: '6px 8px' }} onClick={() => setOptions(options.filter((_, j) => j !== i))}>✕</button>
-              </div>
-            ))}
+            <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>옵션·가격 (첫 옵션 가격이 대표가로 저장돼요)</label>
+            <div style={{ display: 'flex', gap: 6, margin: '6px 0 2px', fontSize: 10.5, color: 'var(--muted)', fontWeight: 700 }}>
+              <span style={{ flex: 2 }}>옵션명</span>
+              <span style={{ flex: 1 }}>판매가(할인적용)</span>
+              <span style={{ flex: 1 }}>정상가(할인전)</span>
+              <span style={{ width: 74, textAlign: 'center' }}>할인</span>
+              <span style={{ width: 28 }} />
+            </div>
+            {options.map((o, i) => {
+              const price = Number(o.price) || 0;
+              const was = Number(o.original_price) || 0;
+              const hasDc = was > price && was > 0;
+              const dcPct = hasDc ? Math.round((1 - price / was) * 100) : 0;
+              const upd = (patch) => setOptions(options.map((x, j) => j === i ? { ...x, ...patch } : x));
+              return (
+                <div key={i} style={{ display: 'flex', gap: 6, margin: '6px 0', alignItems: 'center' }}>
+                  <input style={{ flex: 2, minWidth: 0, width: '100%' }} placeholder="예: 실속 3kg" value={o.label} onChange={(e) => upd({ label: e.target.value })} />
+                  <input style={{ flex: 1, minWidth: 0, width: '100%' }} type="number" placeholder="판매가" value={o.price} onChange={(e) => upd({ price: e.target.value })} />
+                  <input style={{ flex: 1, minWidth: 0, width: '100%' }} type="number" placeholder="비우면 할인X" value={o.original_price ?? ''} onChange={(e) => upd({ original_price: e.target.value })} />
+                  <span style={{ width: 74, textAlign: 'center', fontSize: 11.5, fontWeight: 800, color: hasDc ? 'var(--sale)' : '#b3b6ab' }}>
+                    {hasDc ? `${dcPct}% 할인` : '할인 없음'}
+                  </span>
+                  <button className="btn btn-sm" style={{ color: 'var(--danger)', width: 28, flex: 'none', padding: '6px 4px' }} onClick={() => setOptions(options.filter((_, j) => j !== i))}>✕</button>
+                </div>
+              );
+            })}
             <button className="btn btn-sm" style={{ border: '1px dashed var(--line)', width: '100%', marginTop: 4 }} onClick={() => setOptions([...options, { label: '', price: 0, original_price: '', sort_order: options.length }])}>+ 옵션 추가</button>
+            <p style={{ fontSize: 11, color: 'var(--muted)', margin: '6px 0 0', lineHeight: 1.5 }}>
+              · <b>판매가</b> = 실제 결제되는 할인 적용가, <b>정상가</b> = 할인 전 가격(취소선 표시)<br />
+              · 정상가를 <b>비우거나 판매가와 같게</b> 하면 그 옵션은 <b>할인 없이</b> 표시돼요
+            </p>
 
             <hr style={{ border: 'none', borderTop: '1px solid #E4EBE3', margin: '18px 0 14px' }} />
             <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 8 }}>상품 이미지</label>

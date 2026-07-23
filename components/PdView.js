@@ -31,6 +31,12 @@ export default function PdView({ p, options, reviews, loggedIn, cartCount: initi
 
   async function confirm(buyNow) {
     if (!loggedIn) { router.push(`/login?next=/product/${p.sku}`); return; }
+    // 바로 구매: 장바구니를 거치지 않고 이 상품만 결제
+    if (buyNow) {
+      setOpen(false);
+      router.push(`/checkout?buy=${p.pk}-${opt.pk || 0}-${qty}`);
+      return;
+    }
     const res = await fetch('/api/cart', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -39,8 +45,7 @@ export default function PdView({ p, options, reviews, loggedIn, cartCount: initi
     if (!res.ok) { toast('담기에 실패했어요'); return; }
     setOpen(false);
     setCartCount(cartCount + qty);
-    if (buyNow) router.push('/checkout');
-    else { toast('장바구니에 담았어요 🌿'); router.refresh(); }
+    toast('장바구니에 담았어요 🌿'); router.refresh();
   }
 
   async function toggleWish() {

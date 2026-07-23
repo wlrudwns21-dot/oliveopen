@@ -107,6 +107,9 @@ export default function AdminSite() {
       {/* 사이트 기본 */}
       <SiteTitle value={byKey['site_title']?.config_value || ''} onSave={(v) => saveConfig('site_title', v)} />
 
+      {/* 배송비 정책 */}
+      <ShippingPolicy value={parse(byKey['shipping']?.config_value) || {}} onSave={(v) => saveConfig('shipping', v)} />
+
       {/* 히어로 배너 */}
       <div className="panel">
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
@@ -151,6 +154,32 @@ function SiteTitle({ value, onSave }) {
         <input className="site-inp" value={v} onChange={(e) => setV(e.target.value)} style={{ flex: 1 }} />
         <button className="btn btn-green btn-sm" onClick={() => onSave(v)}>저장</button>
       </div>
+    </div>
+  );
+}
+
+function ShippingPolicy({ value, onSave }) {
+  const [free, setFree] = useState(value.free_threshold ?? 30000);
+  const [fee, setFee] = useState(value.fee ?? 3000);
+  useEffect(() => { setFree(value.free_threshold ?? 30000); setFee(value.fee ?? 3000); }, [JSON.stringify(value)]);
+  return (
+    <div className="panel">
+      <h2>배송비 정책</h2>
+      <p className="sectit">고객 장바구니·주문/결제 화면과 무료배송 안내에 즉시 반영됩니다.</p>
+      <div className="row2" style={{ maxWidth: 520 }}>
+        <div className="field">
+          <label>무료배송 기준 금액 (원)</label>
+          <input type="number" value={free} onChange={(e) => setFree(e.target.value)} placeholder="30000" />
+        </div>
+        <div className="field">
+          <label>기본 배송비 (원)</label>
+          <input type="number" value={fee} onChange={(e) => setFee(e.target.value)} placeholder="3000" />
+        </div>
+      </div>
+      <p style={{ fontSize: 12, color: 'var(--muted)', margin: '2px 0 12px' }}>
+        예) 무료 기준 <b style={{ color: 'var(--green-ink)' }}>{Number(free || 0).toLocaleString('ko-KR')}원</b> · 미만 시 배송비 <b style={{ color: 'var(--green-ink)' }}>{Number(fee || 0).toLocaleString('ko-KR')}원</b>
+      </p>
+      <button className="btn btn-green btn-sm" onClick={() => onSave({ free_threshold: Number(free || 0), fee: Number(fee || 0) })}>배송비 정책 저장</button>
     </div>
   );
 }

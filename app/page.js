@@ -28,6 +28,8 @@ export default async function HomePage() {
   ]);
   const { conf, slides, popups } = getSiteConf(configs);
   const heroSlides = slides.length ? slides : DEFAULT_SLIDES;
+  const freeShip = Number(conf['shipping']?.free_threshold) || 30000;
+  const freeShipMan = Math.floor(freeShip / 10000);
   const text = conf['home_text'] || {};
   const banner = conf['home_banner'] || {};
   const session = getMemberSession();
@@ -92,7 +94,7 @@ export default async function HomePage() {
               <div className="et">Fresh Guarantee</div>
               <div className="dt"><b>{banner.title || '신선 보장제'}</b></div>
               <div className="dchips">
-                <span className="dchip"><IcCheck /> 3만원 이상 전국 무료배송</span>
+                <span className="dchip"><IcCheck /> {freeShipMan > 0 ? `${freeShipMan}만원` : `${freeShip.toLocaleString('ko-KR')}원`} 이상 전국 무료배송</span>
                 <span className="dchip"><IcCheck /> 매일 새벽 산지직송</span>
               </div>
             </div>

@@ -2,18 +2,20 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import PhoneNav from '@/components/PhoneNav';
-import { won, SHIP_FREE, SHIP_FEE } from '@/lib/format';
+import { won } from '@/lib/format';
 import { IcBag, IcTrash } from '@/components/icons';
 
 export default function CartPage() {
   const router = useRouter();
   const [lines, setLines] = useState(null);
+  const [shipping, setShipping] = useState({ freeThreshold: 30000, fee: 3000 });
 
   async function load() {
     const res = await fetch('/api/cart');
     if (res.status === 401) { router.push('/login?next=/cart'); return; }
     const j = await res.json();
     setLines(j.lines || []);
+    if (j.shipping) setShipping(j.shipping);
   }
   useEffect(() => { load(); }, []);
 
@@ -29,9 +31,9 @@ export default function CartPage() {
 
   const total = (lines || []).reduce((a, l) => a + l.price * l.qty, 0);
   const wasTotal = (lines || []).reduce((a, l) => a + (l.was || l.price) * l.qty, 0);
-  const fee = total === 0 || total >= SHIP_FREE ? 0 : SHIP_FEE;
-  const remain = Math.max(0, SHIP_FREE - total);
-  const pct = Math.min(100, Math.round((total / SHIP_FREE) * 100));
+  const fee = total === 0 || total >= shipping.freeThreshold ? 0 : shipping.fee;
+  const remain = Math.max(0, shipping.freeThreshold - total);
+  const pct = Math.min(100, Math.round((total / shipping.freeThreshold) * 100));
   const count = (lines || []).reduce((a, l) => a + l.qty, 0);
 
   return (

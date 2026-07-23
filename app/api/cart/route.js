@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db, imageUrl } from '@/lib/supabase';
 import { getMemberSession } from '@/lib/auth';
+import { getShipping } from '@/lib/shop';
 
 function unauthorized() {
   return NextResponse.json({ error: 'login required' }, { status: 401 });
@@ -9,11 +10,14 @@ function unauthorized() {
 export async function GET() {
   const s = getMemberSession();
   if (!s) return unauthorized();
-  const { data } = await db()
-    .from('cart')
-    .select('*, product(pk, sku, name, price, original_price, status, product_image(*)), product_option(pk, label, price, original_price)')
-    .eq('member_pk', s.pk)
-    .order('pk');
+  const [{ data }, shipping] = await Promise.all([
+    db()
+      .from('cart')
+      .select('*, product(pk, sku, name, price, original_price, status, product_image(*)), product_option(pk, label, price, original_price)')
+      .eq('member_pk', s.pk)
+      .order('pk'),
+    getShipping(),
+  ]);
   const lines = (data || []).map((c) => {
     const thumb = (c.product?.product_image || []).find((i) => i.purpose === 'thumbnail');
     const price = c.product_option ? c.product_option.price : c.product?.price || 0;
@@ -29,7 +33,7 @@ export async function GET() {
       img: imageUrl(thumb?.storage_key),
     };
   });
-  return NextResponse.json({ lines });
+  return NextResponse.json({ lines, shipping });
 }
 
 export async function POST(req) {
