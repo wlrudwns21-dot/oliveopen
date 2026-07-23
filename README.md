@@ -81,9 +81,14 @@ npm run dev   # http://localhost:3100
 - `app/api/` 서버 API — 모든 DB 접근은 서버에서만 수행 (세션: HMAC 서명 쿠키)
 - `supabase/migrations/` 스키마·시드 SQL
 
-## 프로덕션 전환 시 할 일
+## 보안 상태 (2026-07-24 잠금 완료)
 
-1. RLS `open_access_dev` 정책 제거 후 `SUPABASE_SERVICE_ROLE_KEY`만 사용하도록 잠금
-2. 비밀번호 해시를 sha256 → bcrypt/argon2로 교체
-3. 결제(payment.mid/tid/moid)를 실제 PG(나이스페이 등) 연동으로 교체 — 현재는 테스트 결제
-4. 이미지 업로드를 Supabase Storage(`product-images/` 버킷)로 전환 (`storage_key` 필드는 그대로 사용 가능)
+- ✅ **RLS 잠금**: 전체 테이블 `open_access_dev` 개방 정책 제거. anon/authenticated 기본 거부, 서버가 `SUPABASE_SERVICE_ROLE_KEY`(sb_secret_ 키)로만 접근(RLS 우회). → `supabase/migrations/0005_lock_rls_and_storage.sql`
+  - ⚠️ **이 키가 Vercel 환경변수에 반드시 있어야 앱이 동작**. 새 프로젝트로 옮길 때도 동일.
+- ✅ **Storage 잠금**: `product-images` 공개 업로드/목록 정책 제거. 공개 URL 읽기만 가능, 업로드는 서버(secret 키)만.
+- ✅ **비밀번호 bcrypt**: 신규는 bcrypt, 기존 sha256 계정은 로그인 시 자동 재해싱.
+
+## 프로덕션 전환 시 남은 일
+
+1. **전용 Supabase 프로젝트로 분리** (현재 `114lifefortest`를 다른 앱과 공유 중 — 완전 격리 권장). 옮길 때 `supabase/migrations/*.sql`을 순서대로 실행 + `product-images` 버킷 생성 + Vercel 환경변수(URL/anon/secret) 교체.
+2. 결제(payment.mid/tid/moid)를 실제 PG(나이스페이 등) 연동으로 교체 — 현재는 테스트 결제.
