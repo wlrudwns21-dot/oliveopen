@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { toast } from './Toaster';
 import { IcDoc, IcPin, IcHeart, IcCoupon, IcChat, IcOut, IcChev } from './icons';
@@ -7,25 +8,15 @@ import { IcDoc, IcPin, IcHeart, IcCoupon, IcChat, IcOut, IcChev } from './icons'
 const Lead = ({ children }) => <span className="lead">{children}</span>;
 const Chev = () => <span className="chev"><IcChev w={2.2} /></span>;
 
-export function MyMenu({ wishCount, couponCount }) {
+export function MyMenu({ wishCount = 0, couponCount = 0 }) {
   const router = useRouter();
   return (
     <div className="menu">
-      <button onClick={() => document.getElementById('olist')?.scrollIntoView({ behavior: 'smooth' })}>
-        <Lead><IcDoc /></Lead>주문 내역<Chev />
-      </button>
-      <button onClick={() => toast('배송지는 주문/결제 화면에서 수정할 수 있어요')}>
-        <Lead><IcPin /></Lead>배송지 관리<Chev />
-      </button>
-      <button onClick={() => toast(`찜한 상품 ${wishCount}개`)}>
-        <Lead><IcHeart w={1.7} /></Lead>찜한 상품<Chev />
-      </button>
-      <button onClick={() => toast(`사용 가능한 쿠폰 ${couponCount}장`)}>
-        <Lead><IcCoupon /></Lead>쿠폰함<Chev />
-      </button>
-      <button onClick={() => toast('1:1 문의 연결 중이에요')}>
-        <Lead><IcChat /></Lead>1:1 문의<Chev />
-      </button>
+      <Link href="/my/orders"><Lead><IcDoc /></Lead>주문 내역<Chev /></Link>
+      <Link href="/my/addresses"><Lead><IcPin /></Lead>배송지 관리<Chev /></Link>
+      <Link href="/my/wishlist"><Lead><IcHeart w={1.7} /></Lead>찜한 상품 {wishCount > 0 && <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700 }}>({wishCount})</span>}<Chev /></Link>
+      <Link href="/my/coupons"><Lead><IcCoupon /></Lead>쿠폰함 {couponCount > 0 && <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700 }}>({couponCount})</span>}<Chev /></Link>
+      <Link href="/my/inquiry"><Lead><IcChat /></Lead>1:1 문의<Chev /></Link>
       <button
         style={{ color: 'var(--danger)' }}
         onClick={async () => { await fetch('/api/auth/logout', { method: 'POST' }); router.push('/'); router.refresh(); }}
