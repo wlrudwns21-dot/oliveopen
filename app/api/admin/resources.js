@@ -18,5 +18,6 @@ export const RESOURCES = {
   seasonal_item: { table: 'seasonal_item', order: 'sort_order' },
   lounge_story: { table: 'lounge_story', order: 'sort_order' },
   product_review: { table: 'product_review', select: '*, product:product_pk(name)' },
-  coupon: { table: 'coupon', perm: 'MANAGE_COUPONS' },
+  coupon: { table: 'coupon', perm: 'MANAGE_COUPONS', select: '*, product:target_product_pk(name)' },
+  inquiry: { table: 'inquiry', select: '*, member:member_pk(id, nick)' },
 };

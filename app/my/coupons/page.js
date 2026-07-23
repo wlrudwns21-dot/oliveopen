@@ -11,12 +11,20 @@ export const dynamic = 'force-dynamic';
 export default async function CouponsPage() {
   const s = getMemberSession();
   if (!s) redirect('/login?next=/my/coupons');
-  const [{ data: coupons }, cartCount] = await Promise.all([
-    db().from('coupon').select('*').eq('is_active', true).order('pk', { ascending: false }),
+  const sb = db();
+  const [{ data: coupons }, { data: member }, cartCount] = await Promise.all([
+    sb.from('coupon').select('*, product:target_product_pk(name)').eq('is_active', true).order('pk', { ascending: false }),
+    sb.from('member').select('grade').eq('pk', s.pk).single(),
     getCartCount(),
   ]);
   const today = new Date().toISOString().slice(0, 10);
-  const usable = (coupons || []).filter((c) => (!c.until || c.until >= today) && (!c.issue_limit || c.used_count < c.issue_limit));
+  const grade = member?.grade || null;
+  // 내 등급에 해당하는 쿠폰만 (전체 대상 + 내 등급 전용)
+  const usable = (coupons || []).filter((c) =>
+    (!c.until || c.until >= today) &&
+    (!c.issue_limit || c.used_count < c.issue_limit) &&
+    (!c.target_grade || c.target_grade === grade)
+  );
 
   return (
     <div className="stage">
@@ -37,6 +45,8 @@ export default async function CouponsPage() {
                   <div style={{ fontSize: 13, fontWeight: 700, marginTop: 6 }}>{c.name}</div>
                   <div style={{ fontSize: 11, color: 'var(--mint-soft)', marginTop: 5 }}>
                     {won(c.min_order)}원 이상 · {c.until ? `~${c.until}` : '상시'}
+                    {c.target_grade ? ` · ${c.target_grade} 전용` : ''}
+                    {c.product?.name ? ` · ${c.product.name} 구매 시` : ''}
                   </div>
                 </div>
                 <div style={{ borderLeft: '1px dashed rgba(255,255,255,.35)', paddingLeft: 14, textAlign: 'center' }}>

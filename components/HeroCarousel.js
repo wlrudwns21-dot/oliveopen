@@ -26,17 +26,25 @@ export default function HeroCarousel({ slides }) {
     <section className="hero">
       <div className="htrack" ref={ref}>
         {slides.map((s) => (
-          <article key={s.id} className={`hslide ${s.theme || 'green'}`}>
-            <div className="copy">
-              <div className="eyebrow">{s.eyebrow}</div>
-              <h2>{s.title}</h2>
-              <p>{s.desc}</p>
-              <Link className="hcta" href={s.link || '/'}>
-                {s.cta || '지금 보기'} <IcChev />
-              </Link>
-            </div>
-            <div className="hart"><img src={s.image || '/assets/logo-emblem.png'} alt="" /></div>
-          </article>
+          s.mode === 'image' && s.fullImage ? (
+            // 통 이미지 배너
+            <Link key={s.id} href={s.link || '/'} className="hslide" style={{ padding: 0, overflow: 'hidden' }}>
+              <img src={s.fullImage} alt={s.title || ''} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            </Link>
+          ) : (
+            // 구성형 배너 (색상·문구 + 참고 이미지)
+            <article key={s.id} className={`hslide ${s.theme || 'green'}`}>
+              <div className="copy">
+                <div className="eyebrow">{s.eyebrow}</div>
+                <h2>{s.title}</h2>
+                <p>{s.desc}</p>
+                <Link className="hcta" href={s.link || '/'}>
+                  {s.cta || '지금 보기'} <IcChev />
+                </Link>
+              </div>
+              <div className="hart"><img src={s.image || '/assets/logo-emblem.png'} alt="" /></div>
+            </article>
+          )
         ))}
       </div>
       <div className="hdots">

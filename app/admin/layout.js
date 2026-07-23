@@ -13,6 +13,7 @@ const MENU = [
   { href: '/admin/site', ico: '🏠', label: '홈 화면 편집' },
   { href: '/admin/stories', ico: '🛋️', label: '라운지 스토리' },
   { href: '/admin/reviews', ico: '⭐', label: '리뷰 관리' },
+  { href: '/admin/inquiries', ico: '💬', label: '1:1 문의' },
   { href: '/admin/members', ico: '👥', label: '회원 관리', perm: 'MANAGE_MEMBERS' },
   { href: '/admin/coupons', ico: '🎟️', label: '쿠폰·프로모션', perm: 'MANAGE_COUPONS' },
 ];

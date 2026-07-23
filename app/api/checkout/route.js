@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/supabase';
 import { getMemberSession } from '@/lib/auth';
 import { SHIP_FREE, SHIP_FEE } from '@/lib/format';
+import { couponUsable, couponDiscount } from '@/lib/coupon';
 
 export async function POST(req) {
   const s = getMemberSession();
@@ -23,15 +24,15 @@ export async function POST(req) {
   }, 0);
   const fee = total >= SHIP_FREE ? 0 : SHIP_FEE;
 
-  // 쿠폰 검증
+  // 쿠폰 검증 (등급·특정상품 조건 포함, 결제 시점 재검증)
   let discount = 0;
   let coupon = null;
   if (coupon_code) {
     const { data: cp } = await sb.from('coupon').select('*').eq('code', coupon_code).maybeSingle();
-    if (cp && cp.is_active && total >= cp.min_order &&
-        (!cp.until || new Date(cp.until) >= new Date()) &&
-        (!cp.issue_limit || cp.used_count < cp.issue_limit)) {
-      discount = cp.type === 'percent' ? Math.floor((total * cp.value) / 100) : cp.value;
+    const { data: me0 } = await sb.from('member').select('grade').eq('pk', s.pk).single();
+    const ctx = { total, grade: me0?.grade || null, cartProductPks: cartRows.map((c) => c.product_pk) };
+    if (cp && couponUsable(cp, ctx)) {
+      discount = couponDiscount(cp, total);
       coupon = cp;
     }
   }
