@@ -29,7 +29,7 @@ export async function POST(req, { params }) {
   if (error) return error;
   const body = await req.json();
   delete body.pk;
-  if (params.resource === 'member' && body.password) body.password = hashPassword(body.password);
+  if (params.resource === 'member' && body.password) body.password = await hashPassword(body.password);
   const { data, error: dbErr } = await db().from(conf.table).insert(body).select().single();
   if (dbErr) return NextResponse.json({ error: dbErr.message }, { status: 500 });
   return NextResponse.json({ row: data });

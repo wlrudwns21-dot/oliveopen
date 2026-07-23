@@ -18,7 +18,7 @@ export async function PATCH(req, { params }) {
   const body = await req.json();
   delete body.pk;
   if (params.resource === 'member') {
-    if (body.password) body.password = hashPassword(body.password);
+    if (body.password) body.password = await hashPassword(body.password);
     else delete body.password;
   }
   const sb = db();

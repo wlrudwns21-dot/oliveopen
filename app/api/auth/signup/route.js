@@ -16,7 +16,7 @@ export async function POST(req) {
     .from('member')
     .insert({
       id,
-      password: hashPassword(password),
+      password: await hashPassword(password),
       nick,
       extra: { phone: phone || '', address: address || '', detail_address: detail_address || '' },
     })
