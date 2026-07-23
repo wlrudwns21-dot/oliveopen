@@ -60,7 +60,7 @@ export default function AddressesPage() {
             {list && !list.length && <div className="empty" style={{ padding: '40px 20px' }}>등록된 배송지가 없어요</div>}
 
             {(list || []).map((a) => (
-              <div key={a.pk} className="card" style={{ margin: '0 0 12px' }}>
+              <div key={a.pk} className="infocard">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <b style={{ fontSize: 14, fontWeight: 800 }}>{a.recipient}</b>
                   <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--green)', background: '#EEE7D8', padding: '3px 8px', borderRadius: 6 }}>{a.label}</span>

@@ -1,6 +1,6 @@
 import { db, imageUrl } from '@/lib/supabase';
 import { getMemberSession } from '@/lib/auth';
-import { getCartCount } from '@/lib/shop';
+import { getCartCount, getWishedPks } from '@/lib/shop';
 import PdView from '@/components/PdView';
 
 export const dynamic = 'force-dynamic';
@@ -17,9 +17,10 @@ export default async function ProductPage({ params }) {
     return <div className="stage"><div className="phone pg-app"><div className="view"><div className="cartempty"><b>상품을 찾을 수 없어요</b></div></div></div></div>;
   }
 
-  const [{ data: reviews }, cartCount] = await Promise.all([
+  const [{ data: reviews }, cartCount, wished] = await Promise.all([
     sb.from('product_review').select('*').eq('product_pk', product.pk).eq('status', 'approved').order('pk', { ascending: false }).limit(10),
     getCartCount(),
+    getWishedPks(),
   ]);
 
   const thumb = (product.product_image || []).find((i) => i.purpose === 'thumbnail');
@@ -50,6 +51,7 @@ export default async function ProductPage({ params }) {
       reviews={reviews || []}
       loggedIn={!!getMemberSession()}
       cartCount={cartCount}
+      wished={wished.has(product.pk)}
     />
   );
 }

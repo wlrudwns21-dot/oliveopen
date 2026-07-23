@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { getActiveProducts, getCartCount, cardData } from '@/lib/shop';
+import { getActiveProducts, getCartCount, cardData, getWishedPks } from '@/lib/shop';
 import PhoneNav from '@/components/PhoneNav';
 import ProductCard from '@/components/ProductCard';
 import Toaster from '@/components/Toaster';
@@ -8,7 +8,7 @@ import { IcSearch, IcBag } from '@/components/icons';
 export const dynamic = 'force-dynamic';
 
 export default async function CategoryPage({ searchParams }) {
-  const [products, cartCount] = await Promise.all([getActiveProducts(), getCartCount()]);
+  const [products, cartCount, wished] = await Promise.all([getActiveProducts(), getCartCount(), getWishedPks()]);
   const cards = products.map(cardData);
   const cur = searchParams?.f || 'all';
   const q = (searchParams?.q || '').trim();
@@ -41,7 +41,7 @@ export default async function CategoryPage({ searchParams }) {
             <div className="cmain">
               <h2>{curLabel} · {list.length}개</h2>
               <div className="cgrid">
-                {list.map((p) => <ProductCard key={p.pk} p={p} />)}
+                {list.map((p) => <ProductCard key={p.pk} p={p} wished={wished.has(p.pk)} />)}
               </div>
               {!list.length && <div style={{ textAlign: 'center', color: '#9aa08c', fontSize: 13, padding: '40px 0' }}>검색 결과가 없어요</div>}
             </div>

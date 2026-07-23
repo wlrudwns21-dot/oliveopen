@@ -25,6 +25,9 @@ function LoginForm() {
     <div className="stage">
       <div className="phone pg-app">
         <div className="view">
+          <div style={{ padding: '14px 16px 0' }}>
+            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 700, color: 'var(--green2)' }}>← 홈으로</Link>
+          </div>
           <div className="authwrap">
             <div className="logo">
               <img src="/assets/logo-emblem.png" alt="" />

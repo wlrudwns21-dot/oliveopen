@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -26,7 +27,10 @@ export default function SignupPage() {
     <div className="stage">
       <div className="phone pg-app">
         <div className="view">
-          <div className="authwrap" style={{ justifyContent: 'flex-start', paddingTop: 46 }}>
+          <div style={{ padding: '14px 16px 0' }}>
+            <Link href="/" style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 13, fontWeight: 700, color: 'var(--green2)' }}>← 홈으로</Link>
+          </div>
+          <div className="authwrap" style={{ justifyContent: 'flex-start', paddingTop: 24 }}>
             <div className="logo">
               <img src="/assets/logo-emblem.png" alt="" />
               <b>회원가입</b>

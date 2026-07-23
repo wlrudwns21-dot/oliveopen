@@ -5,7 +5,7 @@ import { won } from '@/lib/format';
 import Toaster, { toast } from './Toaster';
 import { IcBack, IcShare, IcBag, IcHeart, IcX, IcTruck, IcCheck } from './icons';
 
-export default function PdView({ p, options, reviews, loggedIn, cartCount: initialCount }) {
+export default function PdView({ p, options, reviews, loggedIn, cartCount: initialCount, wished = false }) {
   const router = useRouter();
   const scrollRef = useRef(null);
   const tabsRef = useRef(null);
@@ -14,7 +14,7 @@ export default function PdView({ p, options, reviews, loggedIn, cartCount: initi
   const [open, setOpen] = useState(false);
   const [sel, setSel] = useState(0);
   const [qty, setQty] = useState(1);
-  const [wish, setWish] = useState(false);
+  const [wish, setWish] = useState(wished);
   const [mode, setMode] = useState('cart');
   const [cartCount, setCartCount] = useState(initialCount);
 

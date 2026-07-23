@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { db } from '@/lib/supabase';
-import { getActiveProducts, getCartCount, getSiteConf, cardData } from '@/lib/shop';
+import { getActiveProducts, getCartCount, getSiteConf, cardData, getWishedPks } from '@/lib/shop';
 import { getMemberSession } from '@/lib/auth';
 import PhoneNav from '@/components/PhoneNav';
 import HeroCarousel from '@/components/HeroCarousel';
@@ -19,10 +19,11 @@ const DEFAULT_SLIDES = [
 ];
 
 export default async function HomePage() {
-  const [{ data: configs }, products, cartCount] = await Promise.all([
+  const [{ data: configs }, products, cartCount, wished] = await Promise.all([
     db().from('site_config').select('config_key, config_value'),
     getActiveProducts(),
     getCartCount(),
+    getWishedPks(),
   ]);
   const { conf, slides } = getSiteConf(configs);
   const heroSlides = slides.length ? slides : DEFAULT_SLIDES;
@@ -107,7 +108,7 @@ export default async function HomePage() {
               <Link href="/category" className="more">전체보기 <IcChev w={2.2} /></Link>
             </div>
             <div className="grid" style={{ padding: 0 }}>
-              {cards.map((p, i) => <ProductCard key={p.pk} p={p} rank={i + 1} />)}
+              {cards.map((p, i) => <ProductCard key={p.pk} p={p} rank={i + 1} wished={wished.has(p.pk)} />)}
             </div>
           </section>
 

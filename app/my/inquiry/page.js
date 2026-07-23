@@ -49,7 +49,7 @@ export default function InquiryPage() {
             {list && !list.length && <div className="empty" style={{ padding: '40px 20px' }}>문의 내역이 없어요</div>}
 
             {(list || []).map((q) => (
-              <div key={q.pk} className="card" style={{ margin: '0 0 12px' }}>
+              <div key={q.pk} className="infocard">
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ fontSize: 10.5, fontWeight: 700, color: 'var(--green2)', background: 'rgba(47,125,69,.1)', padding: '3px 8px', borderRadius: 6 }}>{CAT_LABEL[q.category] || q.category}</span>
                   <span className={`status-pill ${(ST[q.status] || ST.open).c}`}>{(ST[q.status] || ST.open).t}</span>
