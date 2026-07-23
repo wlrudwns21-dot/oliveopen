@@ -7,6 +7,7 @@ import HeroCarousel from '@/components/HeroCarousel';
 import ProductCard from '@/components/ProductCard';
 import IntroSplash from '@/components/IntroSplash';
 import Toaster from '@/components/Toaster';
+import HomePopup from '@/components/HomePopup';
 import { IcBell, IcBag, IcSearch, IcCheck, IcChev, IcSun, IcCheckCircle, IcTruck } from '@/components/icons';
 
 export const dynamic = 'force-dynamic';
@@ -25,7 +26,7 @@ export default async function HomePage() {
     getCartCount(),
     getWishedPks(),
   ]);
-  const { conf, slides } = getSiteConf(configs);
+  const { conf, slides, popups } = getSiteConf(configs);
   const heroSlides = slides.length ? slides : DEFAULT_SLIDES;
   const text = conf['home_text'] || {};
   const banner = conf['home_banner'] || {};
@@ -146,6 +147,7 @@ export default async function HomePage() {
 
         <PhoneNav cartCount={cartCount} />
         <IntroSplash />
+        <HomePopup popups={popups} />
         <Toaster />
       </div>
     </div>

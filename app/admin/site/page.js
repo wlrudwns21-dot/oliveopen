@@ -57,6 +57,11 @@ export default function AdminSite() {
     .map((r) => ({ row: r, data: parse(r.config_value) || {} }))
     .sort((a, b) => (a.data.sort_order || 0) - (b.data.sort_order || 0)), [rows]);
 
+  const popups = useMemo(() => (rows || [])
+    .filter((r) => r.config_key.startsWith('popup/'))
+    .map((r) => ({ row: r, data: parse(r.config_value) || {} }))
+    .sort((a, b) => (a.data.sort_order || 0) - (b.data.sort_order || 0)), [rows]);
+
   async function saveConfig(key, valueObj) {
     const existing = byKey[key];
     const config_value = typeof valueObj === 'string' ? valueObj : JSON.stringify(valueObj);
@@ -80,6 +85,19 @@ export default function AdminSite() {
     try { await remove('site_config', pk); say('삭제했어요'); load(); } catch (e) { say(e.message); }
   }
 
+  async function savePopup(row, data) {
+    const config_value = JSON.stringify(data);
+    try {
+      if (row) await update('site_config', row.pk, { config_value });
+      else await create('site_config', { config_key: `popup/${data.id}`, config_value });
+      say('저장했어요'); load();
+    } catch (e) { say(e.message); }
+  }
+  async function delPopup(pk) {
+    if (!confirm('이 팝업을 삭제할까요?')) return;
+    try { await remove('site_config', pk); say('삭제했어요'); load(); } catch (e) { say(e.message); }
+  }
+
   if (rows === null) return <div className="empty" style={{ paddingTop: 80 }}>불러오는 중…</div>;
 
   return (
@@ -98,6 +116,17 @@ export default function AdminSite() {
         <p className="sectit">홈 화면 최상단에서 자동으로 넘어가는 큰 배너입니다. <b>구성형</b>(색상·문구 직접 편집 + 참고 이미지)과 <b>통 이미지</b>(완성된 이미지 1장 업로드) 두 방식 중 선택할 수 있어요.</p>
         {slides.map((s) => <HeroEditor key={s.row.pk} slide={s} onSave={(data) => saveSlide(s.row, data)} onDelete={() => delSlide(s.row.pk)} />)}
         {!slides.length && <div className="empty">배너가 없어요. + 배너 추가를 눌러 만들어 보세요.</div>}
+      </div>
+
+      {/* 팝업 */}
+      <div className="panel">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+          <h2 style={{ margin: 0 }}>홈 공지 팝업</h2>
+          <button className="btn btn-green btn-sm" onClick={() => savePopup(null, { id: uid(), active: true, title: '공지', body: '', image: '', link: '', linkText: '', sort_order: popups.length })}>+ 팝업 추가</button>
+        </div>
+        <p className="sectit">고객이 홈에 처음 들어올 때 뜨는 공지 팝업이에요. <b>ON/OFF 토글</b>로 노출을 켜고 끌 수 있고, 이미지·제목·내용·이동 링크를 넣을 수 있어요. 고객은 "오늘 하루 보지 않기"를 선택할 수 있습니다.</p>
+        {popups.map((p) => <PopupEditor key={p.row.pk} popup={p} onSave={(data) => savePopup(p.row, data)} onDelete={() => delPopup(p.row.pk)} />)}
+        {!popups.length && <div className="empty">등록된 팝업이 없어요. + 팝업 추가로 만들어 보세요.</div>}
       </div>
 
       {/* 홈 문구 */}
@@ -186,6 +215,59 @@ function HeroEditor({ slide, onSave, onDelete }) {
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
         <button className="btn btn-sm" style={{ color: 'var(--danger)', border: '1px solid #E4EBE3' }} onClick={onDelete}>삭제</button>
         <button className="btn btn-green btn-sm" onClick={() => onSave(d)}>이 배너 저장</button>
+      </div>
+    </div>
+  );
+}
+
+function PopupEditor({ popup, onSave, onDelete }) {
+  const [d, setD] = useState(popup.data);
+  useEffect(() => setD(popup.data), [popup.row.pk]);
+  const set = (k, v) => setD((p) => ({ ...p, [k]: v }));
+
+  return (
+    <div style={{ border: '1px solid #E4EBE3', borderRadius: 14, padding: 16, marginBottom: 14, background: '#fafcf9' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }} className="hero-edit-grid">
+        {/* 미리보기 */}
+        <div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--muted)', marginBottom: 6 }}>미리보기</div>
+          <div style={{ background: '#fff', border: '1px solid #E4EBE3', borderRadius: 14, overflow: 'hidden', maxWidth: 240 }}>
+            {d.image
+              ? <img src={d.image} alt="" style={{ width: '100%', display: 'block' }} />
+              : <div style={{ height: 90, display: 'grid', placeItems: 'center', color: '#9aa08c', fontSize: 12, background: '#f3f6f2' }}>이미지 없음</div>}
+            {(d.title || d.body) && (
+              <div style={{ padding: 12 }}>
+                {d.title && <div style={{ fontSize: 14, fontWeight: 800, color: 'var(--green-ink)' }}>{d.title}</div>}
+                {d.body && <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4, whiteSpace: 'pre-wrap' }}>{d.body}</div>}
+                {d.link && d.linkText && <span style={{ display: 'inline-block', marginTop: 8, background: 'var(--green)', color: '#fff', fontSize: 11, fontWeight: 800, padding: '7px 12px', borderRadius: 9 }}>{d.linkText}</span>}
+              </div>
+            )}
+            <div style={{ display: 'flex', borderTop: '1px solid #E4EBE3', fontSize: 11, color: 'var(--muted)' }}>
+              <div style={{ flex: 1, textAlign: 'center', padding: 9, borderRight: '1px solid #E4EBE3' }}>오늘 하루 보지 않기</div>
+              <div style={{ flex: 1, textAlign: 'center', padding: 9 }}>닫기</div>
+            </div>
+          </div>
+          <label style={{ fontSize: 12, fontWeight: 700, color: '#43503f', display: 'flex', alignItems: 'center', gap: 8, marginTop: 12 }}>
+            노출 (ON/OFF)
+            <span className={`switch ${d.active ? 'on' : ''}`} onClick={() => set('active', !d.active)}><i /></span>
+            <span style={{ fontSize: 11, color: d.active ? 'var(--green2)' : 'var(--muted)' }}>{d.active ? '켜짐' : '꺼짐'}</span>
+          </label>
+        </div>
+
+        {/* 편집 */}
+        <div>
+          <ImageUploader label="팝업 이미지 (선택 · 세로 이미지 권장)" value={d.image || ''} onChange={(url) => set('image', url)} tall />
+          <div className="field"><label>제목</label><input value={d.title || ''} onChange={(e) => set('title', e.target.value)} placeholder="공지 제목" /></div>
+          <div className="field"><label>내용</label><textarea rows={3} value={d.body || ''} onChange={(e) => set('body', e.target.value)} placeholder="공지 내용" /></div>
+          <div className="row2">
+            <div className="field"><label>버튼 문구 (선택)</label><input value={d.linkText || ''} onChange={(e) => set('linkText', e.target.value)} placeholder="자세히 보기" /></div>
+            <div className="field"><label>이동 링크 (선택)</label><input value={d.link || ''} onChange={(e) => set('link', e.target.value)} placeholder="/category" /></div>
+          </div>
+        </div>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 12 }}>
+        <button className="btn btn-sm" style={{ color: 'var(--danger)', border: '1px solid #E4EBE3' }} onClick={onDelete}>삭제</button>
+        <button className="btn btn-green btn-sm" onClick={() => onSave(d)}>이 팝업 저장</button>
       </div>
     </div>
   );
