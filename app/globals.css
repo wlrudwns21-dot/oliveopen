@@ -285,21 +285,22 @@ img{max-width:100%;}
 .pg-app .field input:focus{ border-color:var(--green); box-shadow:0 0 0 3px rgba(28,82,48,.18); }
 .pg-app .authbtn{ width:100%; height:48px; border-radius:12px; background:var(--green); color:#fff; font-size:15px; font-weight:800; box-shadow:0 12px 24px -12px rgba(28,82,48,.6); }
 
-/* pg-app 바텀시트 (배송지/문의 등) + 버튼 유틸 */
-.pg-app .sheet-scrim{ position:absolute; inset:0; z-index:60; background:rgba(15,30,18,.42); }
-.pg-app .sheet{
+/* 바텀시트 (배송지/문의/주소검색 등) + 버튼 유틸 — pg-app·pg-co 공용 */
+.pg-app .sheet-scrim, .pg-co .sheet-scrim{ position:absolute; inset:0; z-index:60; background:rgba(15,30,18,.42); }
+.pg-app .sheet, .pg-co .sheet{
   position:absolute; left:0; right:0; bottom:0; z-index:61; background:#fff;
   border-radius:24px 24px 0 0; padding:18px 18px 22px; max-height:86%; overflow-y:auto;
   box-shadow:0 -16px 40px -16px rgba(0,0,0,.3);
   animation:sheetUp .3s cubic-bezier(.2,.8,.25,1);
 }
-.pg-app .sheet::-webkit-scrollbar{ display:none; }
-.pg-app .sheet h3{ font-size:16px; font-weight:800; color:var(--green-ink); margin-bottom:14px; letter-spacing:-.3px; }
+.pg-app .sheet::-webkit-scrollbar, .pg-co .sheet::-webkit-scrollbar{ display:none; }
+.pg-app .sheet h3, .pg-co .sheet h3{ font-size:16px; font-weight:800; color:var(--green-ink); margin-bottom:14px; letter-spacing:-.3px; }
 @keyframes sheetUp{ from{ transform:translateY(100%); } to{ transform:translateY(0); } }
-.pg-app .btn{ display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:11px; font-weight:800; font-size:13.5px; padding:11px 14px; transition:.15s; }
-.pg-app .btn-green{ background:var(--green); color:#fff; }
-.pg-app .btn-line{ border:1.5px solid var(--green); color:var(--green); background:#fff; }
-.pg-app .btn-sm{ padding:7px 12px; font-size:12.5px; border-radius:9px; }
+.pg-app .btn, .pg-co .btn{ display:inline-flex; align-items:center; justify-content:center; gap:6px; border-radius:11px; font-weight:800; font-size:13.5px; padding:11px 14px; transition:.15s; }
+.pg-app .btn-green, .pg-co .btn-green{ background:var(--green); color:#fff; }
+.pg-app .btn-line, .pg-co .btn-line{ border:1.5px solid var(--green); color:var(--green); background:#fff; }
+.pg-app .btn-sm, .pg-co .btn-sm{ padding:7px 12px; font-size:12.5px; border-radius:9px; }
+.pg-app .btn[disabled], .pg-co .btn[disabled]{ opacity:.5; }
 
 /* ============ pg-pd : 상품 상세 ============ */
 .pg-pd .scroll{ position:absolute; inset:0; overflow-y:auto; overflow-x:hidden; padding-bottom:96px; }

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import MyHeader from '@/components/MyHeader';
 import PhoneNav from '@/components/PhoneNav';
 import Toaster, { toast } from '@/components/Toaster';
+import AddressSearch from '@/components/AddressSearch';
 
 const EMPTY = { label: '우리집', recipient: '', phone: '', zipcode: '', address: '', detail_address: '', is_default: false };
 
@@ -12,6 +13,7 @@ export default function AddressesPage() {
   const [list, setList] = useState(null);
   const [editing, setEditing] = useState(null); // null | {} | row
   const [form, setForm] = useState(EMPTY);
+  const [searching, setSearching] = useState(false); // 주소 검색 시트
 
   async function load() {
     const res = await fetch('/api/addresses');
@@ -89,9 +91,15 @@ export default function AddressesPage() {
               <div className="field"><label>배송지 이름</label><input value={form.label} onChange={set('label')} placeholder="우리집 / 회사" /></div>
               <div className="field"><label>받는 분 *</label><input value={form.recipient} onChange={set('recipient')} /></div>
               <div className="field"><label>연락처 *</label><input value={form.phone} onChange={set('phone')} placeholder="010-0000-0000" /></div>
-              <div className="field"><label>우편번호</label><input value={form.zipcode || ''} onChange={set('zipcode')} /></div>
-              <div className="field"><label>주소 *</label><input value={form.address} onChange={set('address')} /></div>
-              <div className="field"><label>상세주소</label><input value={form.detail_address || ''} onChange={set('detail_address')} /></div>
+              <div className="field">
+                <label>주소 *</label>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input value={form.zipcode || ''} readOnly placeholder="우편번호" style={{ width: 96, flex: 'none', background: '#f6f8f5' }} />
+                  <button type="button" className="btn btn-line btn-sm" style={{ flex: 'none' }} onClick={() => setSearching(true)}>주소 검색</button>
+                </div>
+                <input value={form.address} onChange={set('address')} placeholder="주소 검색으로 입력하세요" style={{ marginTop: 8 }} />
+              </div>
+              <div className="field"><label>상세주소</label><input value={form.detail_address || ''} onChange={set('detail_address')} placeholder="동/호수 등" /></div>
               <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, margin: '4px 0 12px' }}>
                 <input type="checkbox" checked={!!form.is_default} onChange={(e) => setForm({ ...form, is_default: e.target.checked })} style={{ width: 'auto' }} />
                 기본 배송지로 설정
@@ -99,6 +107,17 @@ export default function AddressesPage() {
               <button className="btn btn-green" style={{ width: '100%' }} onClick={save}>저장</button>
             </div>
           </>
+        )}
+
+        {searching && (
+          <AddressSearch
+            onClose={() => setSearching(false)}
+            onSelect={({ zipcode, address }) => {
+              setForm((f) => ({ ...f, zipcode, address }));
+              setSearching(false);
+              toast('주소를 입력했어요. 상세주소를 마저 적어주세요');
+            }}
+          />
         )}
         <PhoneNav />
         <Toaster />

@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { won, SHIP_FREE, SHIP_FEE } from '@/lib/format';
 import Toaster, { toast } from '@/components/Toaster';
+import AddressSearch from '@/components/AddressSearch';
 import { IcBack, IcCheck } from '@/components/icons';
 
 export default function CheckoutPage() {
@@ -19,6 +20,7 @@ export default function CheckoutPage() {
   const [agreed, setAgreed] = useState(true);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
+  const [searching, setSearching] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -105,8 +107,12 @@ export default function CheckoutPage() {
                   <>
                     <input placeholder="받는 분" value={addr.recipient} onChange={set('recipient')} />
                     <input placeholder="연락처" value={addr.phone} onChange={set('phone')} />
-                    <input placeholder="주소" value={addr.address} onChange={set('address')} />
-                    <input placeholder="상세주소" value={addr.detail_address || ''} onChange={set('detail_address')} />
+                    <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                      <input placeholder="우편번호" value={addr.zipcode || ''} readOnly style={{ width: 96, flex: 'none', marginTop: 0, background: '#f6f8f5' }} />
+                      <button type="button" className="btn btn-line btn-sm" style={{ flex: 'none' }} onClick={() => setSearching(true)}>주소 검색</button>
+                    </div>
+                    <input placeholder="주소 (검색으로 입력)" value={addr.address} onChange={set('address')} />
+                    <input placeholder="상세주소 (동/호수 등)" value={addr.detail_address || ''} onChange={set('detail_address')} />
                   </>
                 )}
                 <div className="memo">
@@ -203,6 +209,16 @@ export default function CheckoutPage() {
           <button className="ob" onClick={() => { router.push('/my'); router.refresh(); }}>주문 내역 보기</button>
         </div>
 
+        {searching && (
+          <AddressSearch
+            onClose={() => setSearching(false)}
+            onSelect={({ zipcode, address }) => {
+              setAddr((a) => ({ ...a, zipcode, address }));
+              setSearching(false);
+              toast('주소를 입력했어요. 상세주소를 마저 적어주세요');
+            }}
+          />
+        )}
         <Toaster />
       </div>
     </div>
