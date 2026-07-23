@@ -24,14 +24,14 @@ export default async function MyPage() {
     sb.from('member').select('pk, id, nick, grade, points').eq('pk', s.pk).single(),
     sb.from('orders').select('*, order_item(*)').eq('member_pk', s.pk).order('pk', { ascending: false }).limit(20),
     sb.from('wishlist').select('pk').eq('member_pk', s.pk),
-    sb.from('order_return').select('order_pk, status').eq('member_pk', s.pk),
+    sb.from('order_return').select('order_pk, status, memo').eq('member_pk', s.pk),
     sb.from('coupon').select('pk', { count: 'exact', head: true }).eq('is_active', true),
     getCartCount(),
   ]);
   if (!member) redirect('/login?next=/my');
 
   const returnByOrder = {};
-  (returns || []).forEach((r) => { returnByOrder[r.order_pk] = r.status; });
+  (returns || []).forEach((r) => { returnByOrder[r.order_pk] = r; });
   const flowCount = (st) => (orders || []).filter((o) => o.status === st).length;
   const canReturn = (o) => ['confirmed', 'preparing', 'shipping', 'delivered'].includes(o.status) && !returnByOrder[o.pk];
 
@@ -84,7 +84,12 @@ export default async function MyPage() {
                   <span className="odate">{dt(o.created_at)}</span>
                 </div>
                 {returnByOrder[o.pk] && (
-                  <div className="oprod" style={{ marginTop: 7 }}>↩️ 반품 {RETURN_STATUS[returnByOrder[o.pk]] || returnByOrder[o.pk]}</div>
+                  <div className="oprod" style={{ marginTop: 7 }}>
+                    ↩️ 반품 {RETURN_STATUS[returnByOrder[o.pk].status] || returnByOrder[o.pk].status}
+                    {returnByOrder[o.pk].status === 'rejected' && returnByOrder[o.pk].memo && (
+                      <span style={{ display: 'block', marginTop: 3, color: 'var(--danger)', fontSize: 11.5 }}>사유: {returnByOrder[o.pk].memo}</span>
+                    )}
+                  </div>
                 )}
                 {canReturn(o) && <ReturnButton orderPk={o.pk} />}
               </div>

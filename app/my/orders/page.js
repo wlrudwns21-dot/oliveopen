@@ -22,12 +22,13 @@ export default async function MyOrdersPage() {
   const sb = db();
   const [{ data: orders }, { data: returns }, cartCount] = await Promise.all([
     sb.from('orders').select('*, order_item(*, product:product_pk(sku, product_image(*)))').eq('member_pk', s.pk).order('pk', { ascending: false }),
-    sb.from('order_return').select('order_pk, status').eq('member_pk', s.pk),
+    sb.from('order_return').select('order_pk, status, memo').eq('member_pk', s.pk),
     getCartCount(),
   ]);
   const returnBy = {};
-  (returns || []).forEach((r) => { returnBy[r.order_pk] = r.status; });
+  (returns || []).forEach((r) => { returnBy[r.order_pk] = r; });
   const canReturn = (o) => ['confirmed', 'preparing', 'shipping', 'delivered'].includes(o.status) && !returnBy[o.pk];
+  const RET_LABEL = { requested: '접수', completed: '완료', rejected: '거절' };
 
   return (
     <div className="stage">
@@ -55,7 +56,14 @@ export default async function MyOrdersPage() {
                       </div>
                     </div>
                   </div>
-                  {returnBy[o.pk] && <div className="oprod" style={{ marginTop: 8 }}>↩️ 반품 {RETURN_STATUS[returnBy[o.pk]] || returnBy[o.pk]}</div>}
+                  {returnBy[o.pk] && (
+                    <div className="oprod" style={{ marginTop: 8 }}>
+                      ↩️ 반품 {RET_LABEL[returnBy[o.pk].status] || returnBy[o.pk].status}
+                      {returnBy[o.pk].status === 'rejected' && returnBy[o.pk].memo && (
+                        <span style={{ display: 'block', marginTop: 3, color: 'var(--danger)', fontSize: 11.5 }}>사유: {returnBy[o.pk].memo}</span>
+                      )}
+                    </div>
+                  )}
                   {canReturn(o) && <ReturnButton orderPk={o.pk} />}
                 </div>
               );
