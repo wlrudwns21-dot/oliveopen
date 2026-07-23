@@ -2,8 +2,16 @@
 import { useEffect, useState } from 'react';
 import { list, create, update, remove } from '@/lib/adminApi';
 import { won } from '@/lib/format';
+import ImageUploader from '@/components/admin/ImageUploader';
 
 const EMPTY = { sku: '', name: '', emoji: '', origin: '', sub_title: '', description: '', price: 0, original_price: '', status: 'active', badges: '[]', is_md_pick: false, category_pk: 1, sort_order: 0 };
+
+// product_image.storage_key(상대경로 또는 URL) → 화면에서 볼 수 있는 URL
+function toUrl(key) {
+  if (!key) return '';
+  if (key.startsWith('http') || key.startsWith('/')) return key;
+  return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${key}`;
+}
 
 export default function AdminProducts() {
   const [rows, setRows] = useState(null);
@@ -11,6 +19,8 @@ export default function AdminProducts() {
   const [editing, setEditing] = useState(null);
   const [form, setForm] = useState(EMPTY);
   const [options, setOptions] = useState([]);
+  const [thumb, setThumb] = useState({ url: '', pk: null });   // 대표(썸네일) 이미지
+  const [detail, setDetail] = useState({ url: '', pk: null }); // 상세페이지 이미지
   const [toast, setToast] = useState('');
 
   const load = () => list('product').then(setRows).catch((e) => say(e.message));
@@ -22,11 +32,28 @@ export default function AdminProducts() {
     if (p) {
       setForm({ ...EMPTY, ...p, original_price: p.original_price ?? '', badges: JSON.stringify(p.badges || []) });
       setOptions((p.product_option || []).sort((a, b) => a.sort_order - b.sort_order).map((o) => ({ ...o })));
+      const imgs = p.product_image || [];
+      const t = imgs.find((i) => i.purpose === 'thumbnail');
+      const d = imgs.find((i) => i.purpose === 'detail');
+      setThumb({ url: toUrl(t?.storage_key), pk: t?.pk || null });
+      setDetail({ url: toUrl(d?.storage_key), pk: d?.pk || null });
     } else {
       setForm(EMPTY);
       setOptions([{ label: '', price: 0, original_price: '', sort_order: 0 }]);
+      setThumb({ url: '', pk: null });
+      setDetail({ url: '', pk: null });
     }
     setEditing(p || {});
+  }
+
+  // 이미지 한 종류(썸네일/상세) 저장: 있으면 update, 없으면 insert, 지웠으면 delete
+  async function syncImage(productPk, purpose, state) {
+    if (state.url) {
+      if (state.pk) await update('product_image', state.pk, { storage_key: state.url });
+      else await create('product_image', { product_pk: productPk, storage_key: state.url, purpose, sort_order: 0 });
+    } else if (state.pk) {
+      await remove('product_image', state.pk);
+    }
   }
 
   async function save() {
@@ -59,6 +86,11 @@ export default function AdminProducts() {
       for (const old of editing.product_option || []) {
         if (!keepPks.includes(old.pk)) await remove('product_option', old.pk);
       }
+
+      // 이미지 저장 (썸네일 + 상세페이지)
+      await syncImage(productPk, 'thumbnail', thumb);
+      await syncImage(productPk, 'detail', detail);
+
       setEditing(null); say('저장했어요'); load();
     } catch (e) { say(e.message); }
   }
@@ -149,6 +181,17 @@ export default function AdminProducts() {
               </div>
             ))}
             <button className="btn btn-sm" style={{ border: '1px dashed var(--line)', width: '100%', marginTop: 4 }} onClick={() => setOptions([...options, { label: '', price: 0, original_price: '', sort_order: options.length }])}>+ 옵션 추가</button>
+
+            <hr style={{ border: 'none', borderTop: '1px solid #E4EBE3', margin: '18px 0 14px' }} />
+            <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 8 }}>상품 이미지</label>
+            <div className="row2">
+              <ImageUploader label="대표 이미지 (썸네일 · 정사각 권장)" value={thumb.url} onChange={(url) => setThumb((s) => ({ ...s, url }))} />
+              <ImageUploader label="상세페이지 이미지 (세로로 긴 이미지)" value={detail.url} onChange={(url) => setDetail((s) => ({ ...s, url }))} tall />
+            </div>
+            <p style={{ fontSize: 11, color: 'var(--muted)', margin: '2px 0 4px', lineHeight: 1.5 }}>
+              · 상세페이지 이미지는 상품 상세 화면 "상세정보" 탭에 그대로 노출됩니다 (JPG/PNG · 10MB 이하)<br />
+              · 여러 장을 하나로 이어붙인 세로 긴 이미지 1장을 올리는 방식이 가장 깔끔해요
+            </p>
 
             <div className="modal-acts">
               <button className="btn btn-sm" style={{ border: '1px solid var(--line)' }} onClick={() => setEditing(null)}>취소</button>
