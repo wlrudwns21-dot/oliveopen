@@ -47,8 +47,8 @@ export async function POST(req) {
   let coupon = null;
   if (coupon_code) {
     const { data: cp } = await sb.from('coupon').select('*').eq('code', coupon_code).maybeSingle();
-    const { data: me0 } = await sb.from('member').select('grade').eq('pk', s.pk).single();
-    const ctx = { total, grade: me0?.grade || null, cartProductPks: rows.map((c) => c.product_pk) };
+    const { data: me0 } = await sb.from('member').select('grade, referral_code').eq('pk', s.pk).single();
+    const ctx = { total, grade: me0?.grade || null, referralCode: me0?.referral_code || null, cartProductPks: rows.map((c) => c.product_pk) };
     if (cp && couponUsable(cp, ctx)) {
       discount = couponDiscount(cp, total);
       coupon = cp;
@@ -81,6 +81,7 @@ export async function POST(req) {
       discount_amount: discount,
       used_points: pointsUsed,
       payment_method,
+      coupon_code: coupon?.code || null,
     })
     .select()
     .single();

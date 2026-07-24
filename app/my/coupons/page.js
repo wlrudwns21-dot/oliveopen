@@ -14,16 +14,18 @@ export default async function CouponsPage() {
   const sb = db();
   const [{ data: coupons }, { data: member }, cartCount] = await Promise.all([
     sb.from('coupon').select('*, product:target_product_pk(name)').eq('is_active', true).order('pk', { ascending: false }),
-    sb.from('member').select('grade').eq('pk', s.pk).single(),
+    sb.from('member').select('grade, referral_code').eq('pk', s.pk).single(),
     getCartCount(),
   ]);
   const today = new Date().toISOString().slice(0, 10);
   const grade = member?.grade || null;
-  // 내 등급에 해당하는 쿠폰만 (전체 대상 + 내 등급 전용)
+  const myRef = member?.referral_code || null;
+  // 내 등급 쿠폰만 + 추천 쿠폰은 내 추천코드일 때만
   const usable = (coupons || []).filter((c) =>
     (!c.until || c.until >= today) &&
     (!c.issue_limit || c.used_count < c.issue_limit) &&
-    (!c.target_grade || c.target_grade === grade)
+    (!c.target_grade || c.target_grade === grade) &&
+    (!c.is_referral || c.code === myRef)
   );
 
   return (

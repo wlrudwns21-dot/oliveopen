@@ -10,7 +10,7 @@ export const RESOURCES = {
   orders: { table: 'orders', select: '*, order_item(*), member:member_pk(id, nick), payment(*)' },
   order_return: { table: 'order_return', select: '*, orders:order_pk(order_no, total_amount, status), member:member_pk(id, nick)' },
   payment: { table: 'payment' },
-  member: { table: 'member', perm: 'MANAGE_MEMBERS', hide: ['password'], select: 'pk, id, nick, pre_title, post_title, extra, grade, points, is_active, last_login_at, created_at, updated_at, member_group_mapping(local_member_group_pk)' },
+  member: { table: 'member', perm: 'MANAGE_MEMBERS', hide: ['password'], select: 'pk, id, nick, pre_title, post_title, extra, grade, points, is_active, referral_code, referred_by, last_login_at, created_at, updated_at, member_group_mapping(local_member_group_pk)' },
   member_group: { table: 'member_group', perm: 'MANAGE_MEMBERS' },
   member_group_mapping: { table: 'member_group_mapping', perm: 'MANAGE_MEMBERS' },
   member_address: { table: 'member_address', perm: 'MANAGE_MEMBERS' },

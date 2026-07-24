@@ -34,6 +34,8 @@ export default async function HomePage() {
   const banner = conf['home_banner'] || {};
   const session = getMemberSession();
   const cards = products.map(cardData);
+  const picks = cards.filter((c) => c.mdPick);
+  const pickList = picks.length ? picks : cards.slice(0, 6); // MD픽 없으면 앞 6개로 대체
 
   return (
     <div className="stage">
@@ -111,7 +113,20 @@ export default async function HomePage() {
               <Link href="/category" className="more">전체보기 <IcChev w={2.2} /></Link>
             </div>
             <div className="grid" style={{ padding: 0 }}>
-              {cards.map((p, i) => <ProductCard key={p.pk} p={p} rank={i + 1} wished={wished.has(p.pk)} />)}
+              {pickList.map((p, i) => <ProductCard key={p.pk} p={p} rank={i + 1} wished={wished.has(p.pk)} />)}
+            </div>
+          </section>
+
+          {/* 전체 상품 */}
+          <section className="sec">
+            <div className="sechead">
+              <div>
+                <div className="lab">All Products</div>
+                <h3>전체 상품</h3>
+              </div>
+            </div>
+            <div className="grid" style={{ padding: 0 }}>
+              {cards.map((p) => <ProductCard key={p.pk} p={p} wished={wished.has(p.pk)} />)}
             </div>
           </section>
 

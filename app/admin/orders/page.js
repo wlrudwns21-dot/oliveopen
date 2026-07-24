@@ -85,7 +85,10 @@ export default function AdminOrders() {
               <b>수령인</b> {detail.receiver_name} · {detail.receiver_phone}<br />
               <b>주소</b> {detail.address} {detail.detail_address}<br />
               <b>요청사항</b> {detail.delivery_request || '-'}<br />
-              <b>결제수단</b> {detail.payment_method || '-'} / 배송비 {won(detail.shipping_fee)}원 / 할인 {won(detail.discount_amount)}원
+              <b>결제수단</b> {detail.payment_method || '-'} / 배송비 {won(detail.shipping_fee)}원 / 할인 {won(detail.discount_amount)}원<br />
+              <b>사용 쿠폰</b> {detail.coupon_code
+                ? <span style={{ fontWeight: 700, color: 'var(--green)' }}>🎟️ {detail.coupon_code}</span>
+                : '없음'}
             </p>
             <table className="atable" style={{ minWidth: 0, marginTop: 10 }}>
               <thead><tr><th>상품</th><th>옵션</th><th>수량</th><th>단가</th></tr></thead>

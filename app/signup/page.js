@@ -5,7 +5,7 @@ import Link from 'next/link';
 
 export default function SignupPage() {
   const router = useRouter();
-  const [form, setForm] = useState({ id: '', password: '', nick: '', phone: '', address: '', detail_address: '' });
+  const [form, setForm] = useState({ id: '', password: '', nick: '', phone: '', address: '', detail_address: '', referral_code: '' });
   const [err, setErr] = useState('');
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
@@ -43,6 +43,7 @@ export default function SignupPage() {
               <div className="field"><label>연락처</label><input value={form.phone} onChange={set('phone')} placeholder="010-0000-0000" /></div>
               <div className="field"><label>주소</label><input value={form.address} onChange={set('address')} /></div>
               <div className="field"><label>상세주소</label><input value={form.detail_address} onChange={set('detail_address')} /></div>
+              <div className="field"><label>추천인 코드 (선택)</label><input value={form.referral_code} onChange={set('referral_code')} placeholder="추천인에게 받은 코드" /></div>
               {err && <p style={{ color: 'var(--danger)', fontSize: 12.5, marginBottom: 10, fontWeight: 700 }}>{err}</p>}
               <button className="authbtn">가입하기</button>
             </form>

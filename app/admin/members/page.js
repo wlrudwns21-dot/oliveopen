@@ -20,6 +20,12 @@ export default function AdminMembers() {
         { key: 'points', label: '적립금', render: (r) => `${won(r.points)}P` },
         { key: 'groups', label: '그룹', render: (r) => (r.member_group_mapping || []).map((m) => GROUPS[m.local_member_group_pk] || m.local_member_group_pk).join(', ') || '-' },
         {
+          key: 'referral', label: '추천 가입',
+          render: (r) => r.referral_code
+            ? <span className="status-pill st-purple" title={r.referred_by || ''}>🎁 {r.referral_code}{r.referred_by ? ` · ${r.referred_by}` : ''}</span>
+            : <span style={{ color: '#c2cabb', fontSize: 12 }}>-</span>,
+        },
+        {
           key: 'is_active', label: '활성',
           render: (r, { update }) => (
             <div className={`switch ${r.is_active ? 'on' : ''}`} onClick={() => update({ is_active: !r.is_active })}><i /></div>

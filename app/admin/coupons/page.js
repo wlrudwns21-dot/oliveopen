@@ -6,6 +6,7 @@ import { won } from '@/lib/format';
 const EMPTY = {
   code: '', name: '', type: 'amount', value: 0, min_order: 0, issue_limit: '',
   until: '', is_active: true, target_grade: '', target_product_pk: '',
+  is_referral: false, referrer: '',
 };
 const GRADES = [{ v: '', l: '전체 등급' }, { v: 'GREEN', l: 'GREEN' }, { v: 'GOLD', l: 'GOLD' }, { v: 'VIP', l: 'VIP' }];
 
@@ -30,6 +31,7 @@ export default function AdminCoupons() {
       ...EMPTY, ...row,
       issue_limit: row.issue_limit ?? '', until: row.until ?? '',
       target_grade: row.target_grade ?? '', target_product_pk: row.target_product_pk ?? '',
+      is_referral: !!row.is_referral, referrer: row.referrer ?? '',
     } : EMPTY);
     setEditing(row || {});
   }
@@ -43,6 +45,8 @@ export default function AdminCoupons() {
       until: form.until || null, is_active: !!form.is_active,
       target_grade: form.target_grade || null,
       target_product_pk: form.target_product_pk === '' ? null : Number(form.target_product_pk),
+      is_referral: !!form.is_referral,
+      referrer: form.referrer?.trim() || null,
     };
     try {
       if (editing.pk) await update('coupon', editing.pk, body);
@@ -84,8 +88,11 @@ export default function AdminCoupons() {
             {rows === null && <tr><td colSpan={8} style={{ color: 'var(--muted)' }}>불러오는 중…</td></tr>}
             {filtered.map((c) => (
               <tr key={c.pk}>
-                <td style={{ fontWeight: 700 }}>{c.code}</td>
-                <td>{c.name}</td>
+                <td style={{ fontWeight: 700 }}>
+                  {c.code}
+                  {c.is_referral && <span style={{ marginLeft: 6, fontSize: 10, fontWeight: 800, color: '#7a3b8e', background: '#efe3f4', padding: '2px 6px', borderRadius: 6 }}>추천</span>}
+                </td>
+                <td>{c.name}{c.referrer ? <span style={{ color: 'var(--muted)', fontSize: 11 }}> · {c.referrer}</span> : ''}</td>
                 <td>{c.type === 'percent' ? `${c.value}%` : `${won(c.value)}원`}</td>
                 <td style={{ fontSize: 12, color: 'var(--muted)' }}>{cond(c)}</td>
                 <td>{c.used_count} / {c.issue_limit ?? '∞'}</td>
@@ -141,6 +148,13 @@ export default function AdminCoupons() {
             </div>
 
             <hr style={{ border: 'none', borderTop: '1px solid #E4EBE3', margin: '16px 0 12px' }} />
+            <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontSize: 13, marginBottom: 8 }}>
+              <input type="checkbox" checked={!!form.is_referral} onChange={(e) => set('is_referral', e.target.checked)} style={{ width: 'auto' }} />
+              <b>추천인 코드로 사용</b> <span style={{ color: 'var(--muted)', fontSize: 11.5 }}>(회원가입 시 이 코드 입력한 고객을 "추천 가입"으로 표기)</span>
+            </label>
+            {form.is_referral && (
+              <div className="field"><label>추천인 (이름/식별)</label><input value={form.referrer} onChange={(e) => set('referrer', e.target.value)} placeholder="예: 김규영 / 인스타 @olive" /></div>
+            )}
             <div className="row2">
               <div className="field"><label>발급 한도 (비우면 무제한)</label><input type="number" value={form.issue_limit} onChange={(e) => set('issue_limit', e.target.value)} /></div>
               <div className="field"><label>종료일 (YYYY-MM-DD)</label><input value={form.until} onChange={(e) => set('until', e.target.value)} placeholder="2026-12-31" /></div>

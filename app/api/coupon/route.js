@@ -6,10 +6,10 @@ import { couponUsable, couponDiscount, couponReason } from '@/lib/coupon';
 /** 로그인 회원의 등급 + 장바구니 상품 pk 목록 */
 async function memberContext(sb, memberPk) {
   const [{ data: member }, { data: cart }] = await Promise.all([
-    sb.from('member').select('grade').eq('pk', memberPk).single(),
+    sb.from('member').select('grade, referral_code').eq('pk', memberPk).single(),
     sb.from('cart').select('product_pk').eq('member_pk', memberPk),
   ]);
-  return { grade: member?.grade || null, cartProductPks: (cart || []).map((c) => c.product_pk) };
+  return { grade: member?.grade || null, referralCode: member?.referral_code || null, cartProductPks: (cart || []).map((c) => c.product_pk) };
 }
 
 export async function GET(req) {
