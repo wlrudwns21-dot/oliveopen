@@ -21,4 +21,8 @@ export const RESOURCES = {
   coupon: { table: 'coupon', perm: 'MANAGE_COUPONS', select: '*, product:target_product_pk(name)' },
   inquiry: { table: 'inquiry', select: '*, member:member_pk(id, nick)' },
   partner: { table: 'partner', perm: 'MANAGE_MEMBERS', select: '*, member:member_pk(id, nick)' },
+  admin_request: { table: 'admin_request', perm: 'MANAGE_MEMBERS', select: '*, member:member_pk(id, nick)' },
 };
+
+// 역할 → member_group pk
+export const ROLE_GROUP = { master: 1, manager: 3, operator: 4 };

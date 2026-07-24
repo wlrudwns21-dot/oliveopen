@@ -43,9 +43,6 @@ function LoginForm() {
             <p style={{ textAlign: 'center', fontSize: 13, marginTop: 16, color: 'var(--muted)' }}>
               아직 회원이 아니세요? <Link href="/signup" style={{ color: 'var(--green2)', fontWeight: 700 }}>회원가입</Link>
             </p>
-            <p style={{ textAlign: 'center', fontSize: 11.5, marginTop: 10, color: 'var(--muted)' }}>
-              데모 계정 · olive / olive1234
-            </p>
           </div>
         </div>
       </div>

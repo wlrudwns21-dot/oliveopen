@@ -20,7 +20,13 @@ export async function POST(req) {
     payload = { pk: member.pk, id: member.id, nick: member.nick, isPartner: true, referralCode: partner.referral_code, company: partner.company || member.nick };
   } else {
     payload = await buildAdminPayload(member);
-    if (!payload) return NextResponse.json({ error: '관리자 권한이 없는 계정이에요' }, { status: 403 });
+    if (!payload) {
+      // 어드민 신청 상태 확인 → 친절한 메시지
+      const { data: areq } = await sb.from('admin_request').select('status').eq('member_pk', member.pk).maybeSingle();
+      if (areq?.status === 'pending') return NextResponse.json({ error: '어드민 승인 대기 중이에요. 마스터 승인 후 로그인할 수 있어요.' }, { status: 403 });
+      if (areq?.status === 'rejected') return NextResponse.json({ error: '어드민 신청이 거절됐어요.' }, { status: 403 });
+      return NextResponse.json({ error: '관리자 권한이 없는 계정이에요' }, { status: 403 });
+    }
   }
 
   const patch = { last_login_at: new Date().toISOString() };

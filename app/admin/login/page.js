@@ -2,12 +2,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const DEMO = [
-  { id: 'admin', pw: 'admin1234', label: '마스터', desc: '전체 권한' },
-  { id: 'manager', pw: 'manager1234', label: '관리자', desc: '회원관리 제외' },
-  { id: 'operator', pw: 'operator1234', label: '운영자', desc: '회원·쿠폰 제외' },
-];
-
 export default function AdminLoginPage() {
   const router = useRouter();
   const [id, setId] = useState('');
@@ -36,24 +30,20 @@ export default function AdminLoginPage() {
         <form onSubmit={submit}>
           <div className="lc-fields">
             <label>아이디</label>
-            <input value={id} onChange={(e) => setId(e.target.value)} placeholder="admin / manager / operator" autoComplete="username" />
+            <input value={id} onChange={(e) => setId(e.target.value)} placeholder="아이디" autoComplete="username" />
             <label>비밀번호</label>
             <input type="password" value={pw} onChange={(e) => setPw(e.target.value)} placeholder="비밀번호" autoComplete="current-password" />
           </div>
           <button className="lc-btn">로그인</button>
         </form>
         <div className="lc-err">{err}</div>
-        <div className="lc-hint">
-          <b>데모 계정 · 클릭하면 자동 입력</b>
-          {DEMO.map((d) => (
-            <button key={d.id} onClick={() => { setId(d.id); setPw(d.pw); }}>
-              <span>{d.label}</span> {d.desc}
-            </button>
-          ))}
+        <div className="lc-hint" style={{ borderTop: '1px solid #E4EBE3', paddingTop: 16, textAlign: 'center' }}>
+          <p style={{ fontSize: 12.5, color: 'var(--muted)', marginBottom: 8 }}>계정이 필요하신가요?</p>
+          <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+            <a href="/admin/apply" className="btn btn-line btn-sm" style={{ textDecoration: 'none' }}>어드민 신청</a>
+            <a href="/partner/apply" className="btn btn-line btn-sm" style={{ textDecoration: 'none' }}>파트너 신청</a>
+          </div>
         </div>
-        <p style={{ fontSize: 12, marginTop: 14, color: 'var(--muted)' }}>
-          파트너(추천인)이신가요? <a href="/partner/apply" style={{ color: 'var(--green2)', fontWeight: 700 }}>파트너 신청하기</a>
-        </p>
       </div>
     </div>
   );

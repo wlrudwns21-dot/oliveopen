@@ -15,6 +15,7 @@ const MENU = [
   { href: '/admin/reviews', ico: '⭐', label: '리뷰 관리' },
   { href: '/admin/inquiries', ico: '💬', label: '1:1 문의' },
   { href: '/admin/members', ico: '👥', label: '회원 관리', perm: 'MANAGE_MEMBERS' },
+  { href: '/admin/admins', ico: '🛡️', label: '어드민 승인', perm: 'MANAGE_MEMBERS' },
   { href: '/admin/coupons', ico: '🎟️', label: '쿠폰·프로모션', perm: 'MANAGE_COUPONS' },
   { href: '/admin/referrals', ico: '📈', label: '추천 매출 조회', perm: 'MANAGE_COUPONS' },
   { href: '/admin/partners', ico: '🤝', label: '파트너 관리', perm: 'MANAGE_MEMBERS' },
@@ -26,19 +27,19 @@ const PARTNER_MENU = [{ href: '/admin', ico: '📈', label: '내 매출 현황' 
 export default function AdminLayout({ children }) {
   const path = usePathname();
   const router = useRouter();
-  const isLogin = path === '/admin/login';
+  const isPublic = path === '/admin/login' || path === '/admin/apply';
   const [session, setSession] = useState(null);
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (isLogin) { setChecked(true); return; }
+    if (isPublic) { setChecked(true); return; }
     fetch('/api/admin/me')
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((j) => { setSession(j.session); setChecked(true); })
       .catch(() => router.replace('/admin/login'));
-  }, [isLogin, path]);
+  }, [isPublic, path]);
 
-  if (isLogin) return children;
+  if (isPublic) return children;
   if (!checked || !session) return <div className="empty" style={{ paddingTop: 140 }}>확인 중…</div>;
 
   const isPartner = !!session.isPartner;

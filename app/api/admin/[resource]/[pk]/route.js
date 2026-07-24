@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/supabase';
 import { requireAdmin, hashPassword } from '@/lib/auth';
-import { RESOURCES } from '../../resources';
+import { RESOURCES, ROLE_GROUP } from '../../resources';
 
 function guard(resource) {
   const conf = RESOURCES[resource];
@@ -35,6 +35,18 @@ export async function PATCH(req, { params }) {
       }
     } else if (body.status === 'rejected') {
       await sb.from('orders').update({ status: 'delivered' }).eq('pk', data.order_pk);
+    }
+  }
+
+  // 어드민 승인 부수효과: 승인 시 역할 그룹 매핑 부여, 거절 시 그룹 제거
+  if (params.resource === 'admin_request' && body.status) {
+    const groupPk = ROLE_GROUP[data.requested_role] || ROLE_GROUP.operator;
+    if (body.status === 'approved') {
+      // 기존 어드민 그룹(1,3,4) 정리 후 지정 역할만 부여
+      await sb.from('member_group_mapping').delete().eq('local_member_pk', data.member_pk).in('local_member_group_pk', [1, 3, 4]);
+      await sb.from('member_group_mapping').insert({ local_member_pk: data.member_pk, local_member_group_pk: groupPk });
+    } else if (body.status === 'rejected') {
+      await sb.from('member_group_mapping').delete().eq('local_member_pk', data.member_pk).in('local_member_group_pk', [1, 3, 4]);
     }
   }
   return NextResponse.json({ row: data });
