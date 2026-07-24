@@ -82,7 +82,7 @@ export default async function HomePage() {
           </section>
           <div className="cats">
             {cards.map((p) => (
-              <Link key={p.pk} href={`/category?f=${p.sku}`} className="cat">
+              <Link key={p.pk} href={`/product/${p.sku}`} className="cat">
                 <div className="ring"><img src={p.img} alt={p.name} /></div>
                 <span>{p.name.length > 5 ? p.name.slice(0, 5) : p.name}</span>
               </Link>

@@ -21,10 +21,14 @@ export default function AdminProducts() {
   const [options, setOptions] = useState([]);
   const [thumb, setThumb] = useState({ url: '', pk: null });   // 대표(썸네일) 이미지
   const [detail, setDetail] = useState({ url: '', pk: null }); // 상세페이지 이미지
+  const [categories, setCategories] = useState([]);
   const [toast, setToast] = useState('');
 
   const load = () => list('product').then(setRows).catch((e) => say(e.message));
-  useEffect(() => { load(); }, []);
+  useEffect(() => {
+    load();
+    list('category').then((cs) => setCategories(cs || [])).catch(() => {});
+  }, []);
   const say = (m) => { setToast(m); setTimeout(() => setToast(''), 1800); };
   const set = (k, v) => setForm((p) => ({ ...p, [k]: v }));
 
@@ -68,7 +72,7 @@ export default function AdminProducts() {
       price: first ? Number(first.price) : Number(form.price || 0),
       original_price: first ? (first.original_price ? Number(first.original_price) : null) : (form.original_price ? Number(form.original_price) : null),
       status: form.status, badges, is_md_pick: !!form.is_md_pick,
-      category_pk: Number(form.category_pk || 1), sort_order: Number(form.sort_order || 0),
+      category_pk: form.category_pk ? Number(form.category_pk) : null, sort_order: Number(form.sort_order || 0),
     };
     try {
       let productPk = editing.pk;
@@ -115,7 +119,7 @@ export default function AdminProducts() {
 
       <div className="panel">
         <table className="atable">
-          <thead><tr><th>이미지</th><th>SKU</th><th>상품명</th><th>원산지</th><th>대표가</th><th>옵션</th><th>상태</th><th>MD픽</th><th>관리</th></tr></thead>
+          <thead><tr><th>이미지</th><th>SKU</th><th>상품명</th><th>카테고리</th><th>대표가</th><th>옵션</th><th>상태</th><th>MD픽</th><th>관리</th></tr></thead>
           <tbody>
             {rows === null && <tr><td colSpan={9} style={{ color: 'var(--muted)' }}>불러오는 중…</td></tr>}
             {filtered.map((p) => {
@@ -125,7 +129,7 @@ export default function AdminProducts() {
                   <td>{thumb ? <img className="thumb" src={thumb.storage_key.startsWith('http') || thumb.storage_key.startsWith('/') ? thumb.storage_key : '/assets/logo-emblem.png'} alt="" /> : p.emoji}</td>
                   <td>{p.sku}</td>
                   <td>{p.emoji} {p.name}</td>
-                  <td>{p.origin}</td>
+                  <td>{categories.find((c) => c.pk === p.category_pk)?.name || <span style={{ color: '#c2cabb' }}>미분류</span>}</td>
                   <td>{won(p.price)}원</td>
                   <td>{(p.product_option || []).length}개</td>
                   <td>
@@ -159,9 +163,16 @@ export default function AdminProducts() {
             </div>
             <div className="field"><label>상품명 *</label><input value={form.name} onChange={(e) => set('name', e.target.value)} /></div>
             <div className="row2">
-              <div className="field"><label>원산지</label><input value={form.origin} onChange={(e) => set('origin', e.target.value)} /></div>
+              <div className="field">
+                <label>카테고리</label>
+                <select value={form.category_pk || ''} onChange={(e) => set('category_pk', e.target.value)}>
+                  <option value="">미분류</option>
+                  {categories.map((c) => <option key={c.pk} value={c.pk}>{c.name}</option>)}
+                </select>
+              </div>
               <div className="field"><label>노출 순서</label><input type="number" value={form.sort_order} onChange={(e) => set('sort_order', e.target.value)} /></div>
             </div>
+            <div className="field"><label>원산지</label><input value={form.origin} onChange={(e) => set('origin', e.target.value)} /></div>
             <div className="field"><label>한 줄 소개</label><input value={form.sub_title} onChange={(e) => set('sub_title', e.target.value)} /></div>
             <div className="field"><label>상세 설명</label><textarea rows={2} value={form.description || ''} onChange={(e) => set('description', e.target.value)} /></div>
             <div className="field"><label>배지 (JSON 배열)</label><input value={form.badges} onChange={(e) => set('badges', e.target.value)} placeholder='["새벽 경매 직송","산지직송"]' /></div>
