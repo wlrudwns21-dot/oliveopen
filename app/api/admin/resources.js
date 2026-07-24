@@ -20,4 +20,5 @@ export const RESOURCES = {
   product_review: { table: 'product_review', select: '*, product:product_pk(name)' },
   coupon: { table: 'coupon', perm: 'MANAGE_COUPONS', select: '*, product:target_product_pk(name)' },
   inquiry: { table: 'inquiry', select: '*, member:member_pk(id, nick)' },
+  partner: { table: 'partner', perm: 'MANAGE_MEMBERS', select: '*, member:member_pk(id, nick)' },
 };

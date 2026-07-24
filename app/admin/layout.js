@@ -16,7 +16,12 @@ const MENU = [
   { href: '/admin/inquiries', ico: '💬', label: '1:1 문의' },
   { href: '/admin/members', ico: '👥', label: '회원 관리', perm: 'MANAGE_MEMBERS' },
   { href: '/admin/coupons', ico: '🎟️', label: '쿠폰·프로모션', perm: 'MANAGE_COUPONS' },
+  { href: '/admin/referrals', ico: '📈', label: '추천 매출 조회', perm: 'MANAGE_COUPONS' },
+  { href: '/admin/partners', ico: '🤝', label: '파트너 관리', perm: 'MANAGE_MEMBERS' },
 ];
+
+// 파트너(추천인) 계정 전용 메뉴
+const PARTNER_MENU = [{ href: '/admin', ico: '📈', label: '내 매출 현황' }];
 
 export default function AdminLayout({ children }) {
   const path = usePathname();
@@ -36,11 +41,20 @@ export default function AdminLayout({ children }) {
   if (isLogin) return children;
   if (!checked || !session) return <div className="empty" style={{ paddingTop: 140 }}>확인 중…</div>;
 
+  const isPartner = !!session.isPartner;
   const denied = session.denied || [];
-  const visible = MENU.filter((m) => !m.perm || !denied.includes(m.perm));
-  const cur = MENU.find((m) => m.href === path);
-  if (cur?.perm && denied.includes(cur.perm)) { router.replace('/admin'); return null; }
-  const role = denied.length === 0 ? '마스터' : denied.includes('MANAGE_COUPONS') ? '운영자' : '관리자';
+  let visible, role;
+  if (isPartner) {
+    // 파트너: 자기 매출 현황(/admin)만 접근
+    if (path !== '/admin') { router.replace('/admin'); return null; }
+    visible = PARTNER_MENU;
+    role = '파트너';
+  } else {
+    visible = MENU.filter((m) => !m.perm || !denied.includes(m.perm));
+    const cur = MENU.find((m) => m.href === path);
+    if (cur?.perm && denied.includes(cur.perm)) { router.replace('/admin'); return null; }
+    role = denied.length === 0 ? '마스터' : denied.includes('MANAGE_COUPONS') ? '운영자' : '관리자';
+  }
 
   return (
     <div className="aui">

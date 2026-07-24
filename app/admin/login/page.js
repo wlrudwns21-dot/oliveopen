@@ -51,6 +51,9 @@ export default function AdminLoginPage() {
             </button>
           ))}
         </div>
+        <p style={{ fontSize: 12, marginTop: 14, color: 'var(--muted)' }}>
+          파트너(추천인)이신가요? <a href="/partner/apply" style={{ color: 'var(--green2)', fontWeight: 700 }}>파트너 신청하기</a>
+        </p>
       </div>
     </div>
   );

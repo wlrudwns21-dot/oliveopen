@@ -2,11 +2,30 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/lib/adminApi';
 import { won, dt, ORDER_STATUS } from '@/lib/format';
+import ReferralDetail from '@/components/admin/ReferralDetail';
 
 export default function AdminDashboard() {
   const [d, setD] = useState(null);
-  useEffect(() => { api('dashboard').then(setD).catch(() => {}); }, []);
-  if (!d) return <div className="empty">불러오는 중…</div>;
+  const [me, setMe] = useState(undefined); // undefined=확인중, null=일반관리자, {isPartner}
+  useEffect(() => {
+    fetch('/api/admin/me').then((r) => r.json()).then((j) => {
+      const sess = j.session;
+      if (sess?.isPartner) { setMe(sess); return; }
+      setMe(null);
+      api('dashboard').then(setD).catch(() => {});
+    }).catch(() => setMe(null));
+  }, []);
+
+  // 파트너: 자기 코드 매출 현황만
+  if (me?.isPartner) {
+    return (
+      <>
+        <div className="adm-head"><div><h1>{me.company || me.nick} 매출 현황</h1><span className="sub">MY REFERRAL SALES</span></div></div>
+        <ReferralDetail />
+      </>
+    );
+  }
+  if (me === undefined || !d) return <div className="empty">불러오는 중…</div>;
 
   const max = Math.max(1, ...d.days.map((x) => x.sum));
   const distTotal = Object.values(d.statusDist).reduce((a, b) => a + b, 0) || 1;

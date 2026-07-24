@@ -10,8 +10,18 @@ export async function POST(req) {
   if (!member || !ok || !member.is_active) {
     return NextResponse.json({ error: '아이디 또는 비밀번호가 올바르지 않아요' }, { status: 401 });
   }
-  const payload = await buildAdminPayload(member);
-  if (!payload) return NextResponse.json({ error: '관리자 권한이 없는 계정이에요' }, { status: 403 });
+  // 파트너 계정 우선 확인
+  const { data: partner } = await sb.from('partner').select('status, referral_code, company').eq('member_pk', member.pk).maybeSingle();
+  let payload;
+  if (partner) {
+    if (partner.status === 'pending') return NextResponse.json({ error: '파트너 승인 대기 중이에요. 마스터 승인 후 이용 가능합니다.' }, { status: 403 });
+    if (partner.status === 'rejected') return NextResponse.json({ error: '승인이 거절된 파트너 계정이에요.' }, { status: 403 });
+    if (!partner.referral_code) return NextResponse.json({ error: '추천인 코드가 아직 배정되지 않았어요. 마스터에게 문의하세요.' }, { status: 403 });
+    payload = { pk: member.pk, id: member.id, nick: member.nick, isPartner: true, referralCode: partner.referral_code, company: partner.company || member.nick };
+  } else {
+    payload = await buildAdminPayload(member);
+    if (!payload) return NextResponse.json({ error: '관리자 권한이 없는 계정이에요' }, { status: 403 });
+  }
 
   const patch = { last_login_at: new Date().toISOString() };
   if (legacy) patch.password = await hashPassword(password);
