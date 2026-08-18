@@ -11,6 +11,7 @@ const MENU = [
   { href: '/admin/products', ico: '🍊', label: '상품 관리' },
   { href: '/admin/categories', ico: '🗂️', label: '카테고리 관리' },
   { href: '/admin/seasonal', ico: '🗓️', label: '제철 캘린더' },
+  { href: '/admin/events', ico: '🎁', label: '특가·이벤트' },
   { href: '/admin/site', ico: '🏠', label: '홈 화면 편집' },
   { href: '/admin/stories', ico: '🛋️', label: '라운지 스토리' },
   { href: '/admin/reviews', ico: '⭐', label: '리뷰 관리' },

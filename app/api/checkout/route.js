@@ -8,7 +8,7 @@ import { couponUsable, couponDiscount } from '@/lib/coupon';
 export async function POST(req) {
   const s = getMemberSession();
   if (!s) return NextResponse.json({ error: 'login required' }, { status: 401 });
-  const { address, delivery_request, payment_method, coupon_code, use_points, buynow } = await req.json();
+  const { address, delivery_request, payment_method, coupon_code, use_points, buynow, item_addresses } = await req.json();
   const sb = db();
 
   // 주문 항목 로드: 바로구매(buynow)면 단일 상품, 아니면 장바구니 전체
@@ -87,16 +87,24 @@ export async function POST(req) {
     .single();
   if (orderErr) return NextResponse.json({ error: orderErr.message }, { status: 500 });
 
-  // 주문 항목 (주문 시점 스냅샷)
-  const items = rows.map((c) => ({
-    order_pk: order.pk,
-    product_pk: c.product_pk,
-    product_option_pk: c.product_option_pk,
-    quantity: c.quantity,
-    unit_price: c.product_option ? c.product_option.price : c.product?.price || 0,
-    product_name: c.product?.name,
-    option_label: c.product_option?.label || null,
-  }));
+  // 주문 항목 (주문 시점 스냅샷 + 상품별 배송지)
+  const items = rows.map((c) => {
+    const ia = item_addresses && c.pk != null ? item_addresses[c.pk] : null;
+    return {
+      order_pk: order.pk,
+      product_pk: c.product_pk,
+      product_option_pk: c.product_option_pk,
+      quantity: c.quantity,
+      unit_price: c.product_option ? c.product_option.price : c.product?.price || 0,
+      product_name: c.product?.name,
+      option_label: c.product_option?.label || null,
+      receiver_name: ia?.recipient || null,
+      receiver_phone: ia?.phone || null,
+      zipcode: ia?.zipcode || null,
+      address: ia?.address || null,
+      detail_address: ia?.detail_address || null,
+    };
+  });
   await sb.from('order_item').insert(items);
 
   // 결제 기록 (테스트 PG)

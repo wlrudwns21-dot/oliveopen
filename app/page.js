@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { db } from '@/lib/supabase';
-import { getActiveProducts, getCartCount, getSiteConf, cardData, getWishedPks } from '@/lib/shop';
+import { getActiveProducts, getCartCount, getSiteConf, cardData, getWishedPks, getActiveEvents } from '@/lib/shop';
 import { getMemberSession } from '@/lib/auth';
 import PhoneNav from '@/components/PhoneNav';
 import HeroCarousel from '@/components/HeroCarousel';
@@ -20,11 +20,12 @@ const DEFAULT_SLIDES = [
 ];
 
 export default async function HomePage() {
-  const [{ data: configs }, products, cartCount, wished] = await Promise.all([
+  const [{ data: configs }, products, cartCount, wished, events] = await Promise.all([
     db().from('site_config').select('config_key, config_value'),
     getActiveProducts(),
     getCartCount(),
     getWishedPks(),
+    getActiveEvents(),
   ]);
   const { conf, slides, popups } = getSiteConf(configs);
   const heroSlides = slides.length ? slides : DEFAULT_SLIDES;
@@ -70,6 +71,28 @@ export default async function HomePage() {
 
           {/* hero carousel */}
           <HeroCarousel slides={heroSlides} />
+
+          {/* 진행 중인 이벤트 */}
+          {events.length > 0 && (
+            <>
+              <section className="sec" style={{ paddingBottom: 4 }}>
+                <div className="sechead"><div><div className="lab">Event</div><h3>진행 중인 특가</h3></div></div>
+              </section>
+              <div className="ev-strip">
+                {events.map((e) => (
+                  <Link key={e.pk} href={`/event/${e.slug}`} className={`ev-card ${e.theme || 'green'}`}>
+                    {e.hero_image && <img src={e.hero_image} alt="" />}
+                    <span className="ov" />
+                    <span className="txt">
+                      {e.badge && <span className="b">{e.badge}</span>}
+                      <span className="t">{e.title}</span>
+                      {e.subtitle && <span className="s">{e.subtitle}</span>}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </>
+          )}
 
           {/* categories */}
           <section className="sec" style={{ paddingBottom: 0 }}>

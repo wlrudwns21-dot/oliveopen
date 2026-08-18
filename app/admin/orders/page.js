@@ -91,10 +91,17 @@ export default function AdminOrders() {
                 : '없음'}
             </p>
             <table className="atable" style={{ minWidth: 0, marginTop: 10 }}>
-              <thead><tr><th>상품</th><th>옵션</th><th>수량</th><th>단가</th></tr></thead>
+              <thead><tr><th>상품</th><th>옵션</th><th>수량</th><th>단가</th><th>개별 배송지</th></tr></thead>
               <tbody>
                 {(detail.order_item || []).map((i) => (
-                  <tr key={i.pk}><td>{i.product_name}</td><td>{i.option_label || '-'}</td><td>{i.quantity}</td><td>{won(i.unit_price)}원</td></tr>
+                  <tr key={i.pk}>
+                    <td>{i.product_name}</td><td>{i.option_label || '-'}</td><td>{i.quantity}</td><td>{won(i.unit_price)}원</td>
+                    <td style={{ fontSize: 11.5 }}>
+                      {i.address
+                        ? <span style={{ color: 'var(--green-ink)' }}>📦 {i.receiver_name} · {i.address} {i.detail_address || ''} ({i.receiver_phone})</span>
+                        : <span style={{ color: 'var(--muted)' }}>기본 배송지</span>}
+                    </td>
+                  </tr>
                 ))}
               </tbody>
             </table>

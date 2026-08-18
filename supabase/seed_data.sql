@@ -87,6 +87,18 @@ insert into public.coupon (code, name, type, value, min_order, issue_limit, unti
  ('WELCOME10','신규가입 10% 할인','percent',10,20000,100,'2026-12-31',true),
  ('SUMMER3000','여름맞이 3,000원 할인','amount',3000,30000,200,'2026-08-31',true);
 
+-- ===== 특가 이벤트 (추석 선물세트) =====
+insert into public.event (slug, title, subtitle, badge, theme, hero_image, description, is_active, starts_at, ends_at, sort_order)
+values ('chuseok','추석 선물 세트 특가','정성을 담아, 가장 신선한 과일 선물','추석 한정 특가','green','/assets/brand/season.jpg',
+  '가락시장 새벽 경매로 엄선한 프리미엄 과일을 추석 한정 특가로 준비했어요. 배송은 상품별로 각각 다른 주소로도 보낼 수 있어요.',
+  true,'2026-09-01','2026-10-06',0)
+on conflict (slug) do nothing;
+insert into public.event_product (event_pk, product_pk, special_price, sort_order)
+select e.pk, p.pk, v.sp, v.ord from public.event e
+join (values ('cherry',26900,0),('mango',21900,1),('gamgyul',14900,2),('watermelon',17900,3),('grape',11900,4)) as v(sku,sp,ord) on true
+join public.product p on p.sku = v.sku where e.slug='chuseok'
+on conflict (event_pk, product_pk) do nothing;
+
 -- ===== 샘플 리뷰 =====
 insert into public.product_review (product_pk, author, rating, body, status)
 select p.pk, '고객', r.rating, r.body, r.status from public.product p

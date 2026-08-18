@@ -27,6 +27,9 @@ function CheckoutInner() {
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [addrList, setAddrList] = useState([]);       // 저장된 배송지 목록
+  const [splitShip, setSplitShip] = useState(false);  // 상품별 배송지 나눠보내기
+  const [itemAddr, setItemAddr] = useState({});       // { [line.pk]: addressPk }
 
   async function loadLines() {
     if (buynow) {
@@ -51,6 +54,8 @@ function CheckoutInner() {
       const m = await fetch('/api/auth/me').then((r) => r.json()).catch(() => null);
       if (m?.address) setAddr(m.address);
       if (m?.member) setMe(m.member);
+      const al = await fetch('/api/addresses').then((r) => (r.ok ? r.json() : { addresses: [] })).catch(() => ({ addresses: [] }));
+      setAddrList(al.addresses || []);
     })();
   }, []);
 
@@ -81,6 +86,16 @@ function CheckoutInner() {
     if (!agreed || busy) return;
     if (!addr.recipient || !addr.phone || !addr.address) { toast('배송지 정보를 입력해 주세요'); setEditAddr(true); return; }
     setBusy(true);
+    // 상품별 배송지 매핑 (line.pk → 주소 객체)
+    let item_addresses = null;
+    if (splitShip && !buynow) {
+      item_addresses = {};
+      for (const l of lines) {
+        const aPk = itemAddr[l.pk];
+        const a = addrList.find((x) => String(x.pk) === String(aPk));
+        if (a) item_addresses[l.pk] = { recipient: a.recipient, phone: a.phone, zipcode: a.zipcode || null, address: a.address, detail_address: a.detail_address || null };
+      }
+    }
     const res = await fetch('/api/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -88,6 +103,7 @@ function CheckoutInner() {
         address: addr, delivery_request: memo || null, payment_method: pay,
         coupon_code: coupon?.code || null, use_points: usePoint,
         buynow: buynow || undefined,
+        item_addresses,
       }),
     });
     const j = await res.json();
@@ -156,24 +172,48 @@ function CheckoutInner() {
 
               {/* 주문 상품 */}
               <div className="card">
-                <div className="ch"><div><span className="e">Items</span><h2>주문 상품 <span style={{ color: 'var(--green2)' }}>{(lines || []).length}개</span></h2></div></div>
+                <div className="ch">
+                  <div><span className="e">Items</span><h2>주문 상품 <span style={{ color: 'var(--green2)' }}>{(lines || []).length}개</span></h2></div>
+                  {!buynow && (lines || []).length > 1 && addrList.length > 0 && (
+                    <label style={{ display: 'flex', gap: 6, alignItems: 'center', fontSize: 11.5, fontWeight: 700, color: splitShip ? 'var(--green)' : 'var(--muted)' }}>
+                      상품별 배송지
+                      <span className={`switch ${splitShip ? 'on' : ''}`} onClick={() => setSplitShip(!splitShip)} style={{ width: 36, height: 21 }}><i /></span>
+                    </label>
+                  )}
+                </div>
                 {(lines || []).map((l, i) => (
-                  <div key={l.pk ?? `bn-${i}`} className="citem">
-                    <div className="pic"><img src={l.img} alt={l.name} /></div>
-                    <div className="b">
-                      <div className="nm">{l.name}</div>
-                      <div className="op">{l.option}</div>
-                      <div className="pr"><span className="price">{won(l.price * l.qty)}원</span><span className="q">수량 {l.qty}개</span></div>
+                  <div key={l.pk ?? `bn-${i}`} style={{ borderBottom: i < lines.length - 1 ? '1px solid var(--line)' : 'none', paddingBottom: 4 }}>
+                    <div className="citem" style={{ borderBottom: 'none' }}>
+                      <div className="pic"><img src={l.img} alt={l.name} /></div>
+                      <div className="b">
+                        <div className="nm">{l.name}</div>
+                        <div className="op">{l.option}</div>
+                        <div className="pr"><span className="price">{won(l.price * l.qty)}원</span><span className="q">수량 {l.qty}개</span></div>
+                      </div>
+                      {!buynow && (
+                        <button onClick={() => removeLine(l.pk)} aria-label="삭제"
+                          style={{ alignSelf: 'flex-start', color: '#aab0a0', fontSize: 18, fontWeight: 700, padding: '2px 4px', lineHeight: 1 }}>✕</button>
+                      )}
                     </div>
-                    {!buynow && (
-                      <button
-                        onClick={() => removeLine(l.pk)}
-                        aria-label="삭제"
-                        style={{ alignSelf: 'flex-start', color: '#aab0a0', fontSize: 18, fontWeight: 700, padding: '2px 4px', lineHeight: 1 }}
-                      >✕</button>
+                    {splitShip && !buynow && (
+                      <div style={{ padding: '0 0 10px' }}>
+                        <select
+                          value={itemAddr[l.pk] || ''}
+                          onChange={(e) => setItemAddr({ ...itemAddr, [l.pk]: e.target.value })}
+                          style={{ width: '100%', border: '1.5px solid var(--line)', borderRadius: 10, padding: '9px 11px', fontSize: 12.5, background: '#fff' }}
+                        >
+                          <option value="">기본 배송지로 보내기</option>
+                          {addrList.map((a) => (
+                            <option key={a.pk} value={a.pk}>{a.label} · {a.recipient} ({a.address}{a.detail_address ? ` ${a.detail_address}` : ''})</option>
+                          ))}
+                        </select>
+                      </div>
                     )}
                   </div>
                 ))}
+                {!buynow && addrList.length === 0 && (lines || []).length > 1 && (
+                  <p style={{ fontSize: 11, color: 'var(--muted)', marginTop: 8 }}>상품별 배송지를 나누려면 먼저 마이쇼핑 → 배송지 관리에서 배송지를 추가하세요.</p>
+                )}
                 {buynow && <p style={{ fontSize: 11.5, color: 'var(--muted)', marginTop: 8 }}>🛍️ 바로 구매 — 장바구니와 별개로 이 상품만 결제됩니다.</p>}
               </div>
 

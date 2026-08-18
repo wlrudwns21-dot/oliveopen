@@ -22,6 +22,8 @@ export const RESOURCES = {
   inquiry: { table: 'inquiry', select: '*, member:member_pk(id, nick)' },
   partner: { table: 'partner', perm: 'MANAGE_MEMBERS', select: '*, member:member_pk(id, nick)' },
   admin_request: { table: 'admin_request', perm: 'MANAGE_MEMBERS', select: '*, member:member_pk(id, nick)' },
+  event: { table: 'event', order: 'sort_order' },
+  event_product: { table: 'event_product', order: 'sort_order', select: '*, product:product_pk(name, sku, price, emoji)' },
 };
 
 // 역할 → member_group pk

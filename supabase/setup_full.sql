@@ -127,6 +127,7 @@ create table public.order_item (
   quantity integer not null default 1, unit_price integer not null default 0,
   product_option_pk bigint references public.product_option(pk) on delete set null,
   product_name text, option_label text,
+  receiver_name text, receiver_phone text, zipcode text, address text, detail_address text, -- 상품별 배송지
   created_at timestamptz not null default now()
 );
 create table public.order_return (
@@ -201,6 +202,25 @@ create table public.inquiry (
   updated_at timestamptz not null default now()
 );
 
+-- ===== 특가/이벤트 =====
+create table public.event (
+  pk bigint generated always as identity primary key,
+  slug text not null unique, title text not null, subtitle text, badge text,
+  theme text not null default 'green', hero_image text, description text,
+  is_active boolean not null default true, starts_at date, ends_at date,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create table public.event_product (
+  pk bigint generated always as identity primary key,
+  event_pk bigint not null references public.event(pk) on delete cascade,
+  product_pk bigint not null references public.product(pk) on delete cascade,
+  special_price integer, sort_order integer not null default 0,
+  unique (event_pk, product_pk)
+);
+create index on public.event_product (event_pk);
+
 -- ===== 파트너 / 어드민 신청 =====
 create table public.partner (
   pk bigint generated always as identity primary key,
@@ -235,7 +255,7 @@ create index on public.partner (referral_code);
 
 -- ===== updated_at 트리거 =====
 do $$ declare t text; begin
-  foreach t in array array['member','category','product','cart','orders','order_return','payment','site_config','member_address','product_review','coupon','seasonal_item','lounge_story','inquiry','partner','admin_request']
+  foreach t in array array['member','category','product','cart','orders','order_return','payment','site_config','member_address','product_review','coupon','seasonal_item','lounge_story','inquiry','partner','admin_request','event']
   loop execute format('create trigger trg_%s_updated_at before update on public.%I for each row execute function public.set_updated_at()', t, t); end loop;
 end $$;
 
@@ -243,13 +263,13 @@ end $$;
 --       서버는 SUPABASE_SERVICE_ROLE_KEY(secret 키)로 접근하여 RLS 우회.
 --       ※ 로컬 개발에서 anon 키로 직접 접근하려면 아래 주석 블록으로 개방 정책을 추가하세요. =====
 do $$ declare t text; begin
-  foreach t in array array['member','member_group','member_group_permission','member_group_mapping','member_address','category','product','product_option','product_image','cart','wishlist','orders','order_item','order_return','payment','site_config','seasonal_item','lounge_story','product_review','coupon','inquiry','partner','admin_request']
+  foreach t in array array['member','member_group','member_group_permission','member_group_mapping','member_address','category','product','product_option','product_image','cart','wishlist','orders','order_item','order_return','payment','site_config','seasonal_item','lounge_story','product_review','coupon','inquiry','partner','admin_request','event','event_product']
   loop execute format('alter table public.%I enable row level security', t); end loop;
 end $$;
 
 /*  (개발용 개방 정책 — 필요 시 주석 해제)
 do $$ declare t text; begin
-  foreach t in array array['member','member_group','member_group_permission','member_group_mapping','member_address','category','product','product_option','product_image','cart','wishlist','orders','order_item','order_return','payment','site_config','seasonal_item','lounge_story','product_review','coupon','inquiry','partner','admin_request']
+  foreach t in array array['member','member_group','member_group_permission','member_group_mapping','member_address','category','product','product_option','product_image','cart','wishlist','orders','order_item','order_return','payment','site_config','seasonal_item','lounge_story','product_review','coupon','inquiry','partner','admin_request','event','event_product']
   loop execute format('create policy "open_access_dev" on public.%I for all using (true) with check (true)', t); end loop;
 end $$;
 */
