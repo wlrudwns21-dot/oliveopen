@@ -47,6 +47,13 @@ export default async function EventPage({ params }) {
             <p style={{ padding: '16px 20px 0', fontSize: 12.5, color: 'var(--muted)', lineHeight: 1.7 }}>{event.description}</p>
           )}
 
+          <div style={{ padding: '14px 20px 0' }}>
+            <Link href="/gift" className="btn btn-green" style={{ width: '100%', height: 50, fontSize: 15 }}>🎁 추석 선물 신청하기 (받는 분께 바로 배송)</Link>
+          </div>
+          <p style={{ padding: '8px 20px 0', fontSize: 11.5, color: 'var(--muted)', lineHeight: 1.5 }}>
+            받는 분 주소로 직접 보내는 선물 신청 · 배송 희망일 지정 가능
+          </p>
+
           <div className="grid" style={{ padding: '16px 20px 0' }}>
             {products.map((p) => <ProductCard key={p.pk} p={p} wished={wished.has(p.pk)} />)}
           </div>

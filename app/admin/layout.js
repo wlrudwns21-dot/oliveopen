@@ -8,6 +8,7 @@ const MENU = [
   { href: '/admin', ico: '📊', label: '대시보드' },
   { href: '/admin/orders', ico: '📦', label: '주문 관리' },
   { href: '/admin/returns', ico: '↩️', label: '반품 관리' },
+  { href: '/admin/gift-orders', ico: '🎀', label: '추석 선물 신청' },
   { href: '/admin/products', ico: '🍊', label: '상품 관리' },
   { href: '/admin/categories', ico: '🗂️', label: '카테고리 관리' },
   { href: '/admin/seasonal', ico: '🗓️', label: '제철 캘린더' },

@@ -221,6 +221,21 @@ create table public.event_product (
 );
 create index on public.event_product (event_pk);
 
+-- ===== 추석 선물 신청 =====
+create table public.gift_order (
+  pk bigint generated always as identity primary key,
+  member_pk bigint references public.member(pk) on delete set null,
+  product_pk bigint references public.product(pk) on delete set null,
+  product_name text, product_price integer,
+  orderer_name text, orderer_phone text,
+  recipient_name text not null, recipient_phone text not null,
+  zipcode text, address text not null, detail_address text,
+  delivery_date date, memo text, status text not null default 'pending',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index on public.gift_order (status);
+
 -- ===== 파트너 / 어드민 신청 =====
 create table public.partner (
   pk bigint generated always as identity primary key,
@@ -255,7 +270,7 @@ create index on public.partner (referral_code);
 
 -- ===== updated_at 트리거 =====
 do $$ declare t text; begin
-  foreach t in array array['member','category','product','cart','orders','order_return','payment','site_config','member_address','product_review','coupon','seasonal_item','lounge_story','inquiry','partner','admin_request','event']
+  foreach t in array array['member','category','product','cart','orders','order_return','payment','site_config','member_address','product_review','coupon','seasonal_item','lounge_story','inquiry','partner','admin_request','event','gift_order']
   loop execute format('create trigger trg_%s_updated_at before update on public.%I for each row execute function public.set_updated_at()', t, t); end loop;
 end $$;
 
@@ -263,13 +278,13 @@ end $$;
 --       서버는 SUPABASE_SERVICE_ROLE_KEY(secret 키)로 접근하여 RLS 우회.
 --       ※ 로컬 개발에서 anon 키로 직접 접근하려면 아래 주석 블록으로 개방 정책을 추가하세요. =====
 do $$ declare t text; begin
-  foreach t in array array['member','member_group','member_group_permission','member_group_mapping','member_address','category','product','product_option','product_image','cart','wishlist','orders','order_item','order_return','payment','site_config','seasonal_item','lounge_story','product_review','coupon','inquiry','partner','admin_request','event','event_product']
+  foreach t in array array['member','member_group','member_group_permission','member_group_mapping','member_address','category','product','product_option','product_image','cart','wishlist','orders','order_item','order_return','payment','site_config','seasonal_item','lounge_story','product_review','coupon','inquiry','partner','admin_request','event','event_product','gift_order']
   loop execute format('alter table public.%I enable row level security', t); end loop;
 end $$;
 
 /*  (개발용 개방 정책 — 필요 시 주석 해제)
 do $$ declare t text; begin
-  foreach t in array array['member','member_group','member_group_permission','member_group_mapping','member_address','category','product','product_option','product_image','cart','wishlist','orders','order_item','order_return','payment','site_config','seasonal_item','lounge_story','product_review','coupon','inquiry','partner','admin_request','event','event_product']
+  foreach t in array array['member','member_group','member_group_permission','member_group_mapping','member_address','category','product','product_option','product_image','cart','wishlist','orders','order_item','order_return','payment','site_config','seasonal_item','lounge_story','product_review','coupon','inquiry','partner','admin_request','event','event_product','gift_order']
   loop execute format('create policy "open_access_dev" on public.%I for all using (true) with check (true)', t); end loop;
 end $$;
 */
