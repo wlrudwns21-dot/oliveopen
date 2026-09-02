@@ -70,7 +70,8 @@ export default function GiftForm({ products, event }) {
           <div style={{ fontSize: 56 }}>🎁</div>
           <h2 style={{ fontSize: 20, margin: '10px 0 6px' }}>선물 신청이 접수됐어요</h2>
           <p style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.6 }}>총 <b style={{ color: 'var(--green-ink)' }}>{done.count}건</b>의 선물이 접수됐어요.<br />담당자가 확인 후 배송을 진행합니다.</p>
-          <button className="authbtn" style={{ marginTop: 20 }} onClick={resetAll}>새로 신청하기</button>
+          <a href="https://www.oliveopen.com/" className="authbtn" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 20, textDecoration: 'none' }}>돌아가기</a>
+          <button type="button" onClick={resetAll} style={{ marginTop: 12, fontSize: 13, fontWeight: 700, color: 'var(--green2)' }}>새로 신청하기</button>
         </div>
       </div></div></div>
     );
