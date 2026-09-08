@@ -1,22 +1,20 @@
-import { db } from '@/lib/supabase';
-import GiftForm from '@/components/GiftForm';
+export const metadata = { title: '준비 중인 서비스' };
 
-export const dynamic = 'force-dynamic';
-
-export default async function GiftApplyPage() {
-  const sb = db();
-  const [{ data: cat }, { data: event }] = await Promise.all([
-    sb.from('category').select('pk').eq('slug', 'giftset').maybeSingle(),
-    sb.from('event').select('title, subtitle, badge, theme, hero_image').eq('slug', 'chuseok').maybeSingle(),
-  ]);
-  let products = [];
-  if (cat) {
-    const { data } = await sb.from('product').select('pk, name, price').eq('category_pk', cat.pk).eq('status', 'active').order('sort_order');
-    products = data || [];
-  }
-  if (!products.length) {
-    const { data } = await sb.from('product').select('pk, name, price').eq('status', 'active').order('sort_order');
-    products = data || [];
-  }
-  return <GiftForm products={products} event={event || null} />;
+export default function GiftPage() {
+  return (
+    <div style={{
+      minHeight: '100svh', display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '32px 24px', background: 'radial-gradient(120% 80% at 50% 0%, #FAF7F0 0%, #F0EBE0 55%, #E4DCCC 100%)',
+      textAlign: 'center',
+    }}>
+      <div style={{ maxWidth: 380 }}>
+        <div style={{ fontSize: 60, marginBottom: 12 }}>🎁</div>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: '#0F2E19', letterSpacing: '-0.4px' }}>준비 중인 서비스입니다</h1>
+        <p style={{ fontSize: 15, color: '#5b6a4a', lineHeight: 1.7, marginTop: 14 }}>
+          현재 선물 신청 서비스를 준비하고 있어요.<br />
+          돌아가서 결제를 완료해 주시면 감사하겠습니다. 🙏
+        </p>
+      </div>
+    </div>
+  );
 }
