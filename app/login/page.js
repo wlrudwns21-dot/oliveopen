@@ -43,6 +43,7 @@ function LoginForm() {
             <p style={{ textAlign: 'center', fontSize: 13, marginTop: 16, color: 'var(--muted)' }}>
               아직 회원이 아니세요? <Link href="/signup" style={{ color: 'var(--green2)', fontWeight: 700 }}>회원가입</Link>
             </p>
+            <Link href="/wholesale" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: 18, padding: '12px', border: '1px solid var(--line)', borderRadius: 12, fontSize: 13, fontWeight: 800, color: 'var(--green-ink)', textDecoration: 'none', background: '#f6f8f5' }}>🏢 도매 사업자이신가요? 도매 회원 전용관 →</Link>
           </div>
         </div>
       </div>
