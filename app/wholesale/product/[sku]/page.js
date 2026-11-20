@@ -1,4 +1,4 @@
-import { getWholesaleAccount, getWholesaleProduct } from '@/lib/wholesale';
+import { getWholesaleAccount, getWholesaleProduct, getWholesaleProducts } from '@/lib/wholesale';
 import { db } from '@/lib/supabase';
 import WholesaleGate from '@/components/WholesaleGate';
 import { Gate, Btn } from '@/components/WholesaleGates';
@@ -16,7 +16,11 @@ export default async function Page({ params }) {
   if (!product) return <Gate icon="🔍" title="상품을 찾을 수 없어요" desc="도매 전용 상품이 아니거나 판매가 중지됐어요." cta={<Btn href="/wholesale">도매관으로</Btn>} />;
 
   const sb = db();
-  const { data: c } = await sb.from('wholesale_cart').select('box_qty').eq('member_pk', session.pk).eq('product_pk', product.pk).maybeSingle();
+  const [{ data: c }, all] = await Promise.all([
+    sb.from('wholesale_cart').select('box_qty').eq('member_pk', session.pk).eq('product_pk', product.pk).maybeSingle(),
+    getWholesaleProducts(),
+  ]);
+  const related = all.filter((p) => p.sku !== product.sku).slice(0, 8);
 
-  return <WholesaleProductDetail product={product} inCartQty={c?.box_qty || 0} />;
+  return <WholesaleProductDetail product={product} inCartQty={c?.box_qty || 0} related={related} />;
 }

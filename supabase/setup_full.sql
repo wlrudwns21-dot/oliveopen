@@ -246,10 +246,13 @@ create table public.wholesale_account (
   pk bigint generated always as identity primary key,
   member_pk bigint not null references public.member(pk) on delete cascade unique,
   company_name text not null, business_no text not null, owner_name text,
+  industry text, manager_name text,
   contact_phone text, contact_email text,
   zipcode text, address text, detail_address text,
   cert_key text, status text not null default 'pending', reject_reason text,
   approved_at timestamptz,
+  credit_status text not null default 'none',   -- none|pending|approved|rejected (세금계산서 여신)
+  credit_limit integer not null default 0, credit_approved_at timestamptz,
   created_at timestamptz not null default now(), updated_at timestamptz not null default now()
 );
 create index on public.wholesale_account (status);
@@ -257,10 +260,22 @@ create table public.wholesale_order (
   pk bigint generated always as identity primary key,
   member_pk bigint references public.member(pk) on delete set null,
   order_no text, box_total integer not null default 0, total integer not null default 0,
+  payment_method text not null default 'normal',  -- normal|tax_invoice
+  manager_name text,
   note text, status text not null default 'pending',
   created_at timestamptz not null default now(), updated_at timestamptz not null default now()
 );
 create index on public.wholesale_order (member_pk);
+-- 도매 장바구니
+create table public.wholesale_cart (
+  pk bigint generated always as identity primary key,
+  member_pk bigint not null references public.member(pk) on delete cascade,
+  product_pk bigint not null references public.product(pk) on delete cascade,
+  box_qty integer not null default 1,
+  created_at timestamptz not null default now(), updated_at timestamptz not null default now(),
+  unique (member_pk, product_pk)
+);
+create index on public.wholesale_cart (member_pk);
 create table public.wholesale_order_item (
   pk bigint generated always as identity primary key,
   order_pk bigint not null references public.wholesale_order(pk) on delete cascade,
@@ -306,7 +321,7 @@ create index on public.partner (referral_code);
 
 -- ===== updated_at 트리거 =====
 do $$ declare t text; begin
-  foreach t in array array['member','category','product','cart','orders','order_return','payment','site_config','member_address','product_review','coupon','seasonal_item','lounge_story','inquiry','partner','admin_request','event','gift_order','wholesale_account','wholesale_order','wholesale_order_item']
+  foreach t in array array['member','category','product','cart','orders','order_return','payment','site_config','member_address','product_review','coupon','seasonal_item','lounge_story','inquiry','partner','admin_request','event','gift_order','wholesale_account','wholesale_order','wholesale_order_item','wholesale_cart']
   loop execute format('create trigger trg_%s_updated_at before update on public.%I for each row execute function public.set_updated_at()', t, t); end loop;
 end $$;
 

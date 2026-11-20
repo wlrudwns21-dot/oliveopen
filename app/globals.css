@@ -868,7 +868,7 @@ img{max-width:100%;}
 .ws-card-box{ font-size:11px; color:var(--muted); }
 .ws-card-price{ font-size:14.5px; font-weight:800; color:var(--green-ink); margin-top:3px; }
 .ws-card-price em{ font-size:10.5px; color:var(--muted); font-style:normal; font-weight:600; margin-left:1px; }
-.ws-tabbar{ position:sticky; bottom:0; display:flex; background:#fff; border-top:1px solid var(--line); }
+.ws-tabbar{ position:absolute; left:0; right:0; bottom:0; z-index:50; height:72px; background:rgba(255,255,255,.95); backdrop-filter:blur(14px); border-top:1px solid var(--line); display:flex; padding:8px 6px 14px; }
 .ws-tab{ flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:9px 0; font-size:10.5px; color:var(--muted); text-decoration:none; font-weight:700; position:relative; }
 .ws-tab span{ font-size:10.5px; }
 .ws-badge{ position:absolute; top:4px; left:calc(50% + 8px); background:var(--green); color:#fff; font-size:9.5px; font-weight:800; min-width:16px; height:16px; border-radius:9px; display:grid; place-items:center; font-style:normal; padding:0 4px; }
@@ -877,7 +877,7 @@ img{max-width:100%;}
 .ws-price-row{ display:flex; justify-content:space-between; align-items:center; padding:7px 0; border-bottom:1px solid #f0f2ee; font-size:13px; }
 .ws-price-row:last-child{ border-bottom:none; }
 .ws-price-row span{ color:var(--muted); }
-.ws-detail-bar{ position:sticky; bottom:0; display:flex; gap:8px; padding:10px 14px calc(10px + env(safe-area-inset-bottom)); background:#fff; border-top:1px solid var(--line); }
+.ws-detail-bar{ position:absolute; left:0; right:0; bottom:0; z-index:50; display:flex; gap:8px; padding:10px 14px calc(14px + env(safe-area-inset-bottom)); background:#fff; border-top:1px solid var(--line); box-shadow:0 -8px 24px -14px rgba(0,0,0,.3); }
 .ws-btn-dark{ background:var(--green-ink) !important; }
 .ws-cart-row{ display:flex; gap:11px; padding:12px 0; border-bottom:1px solid #f0f2ee; align-items:flex-start; }
 .ws-cart-img{ width:56px; height:56px; border-radius:11px; background:#f6f8f5; display:grid; place-items:center; overflow:hidden; flex:none; font-size:24px; }
@@ -922,3 +922,48 @@ img{max-width:100%;}
 .ws-order-card-item .to{ color:var(--muted); flex:none; }
 .ws-order-card-total{ display:flex; justify-content:space-between; border-top:1px solid #f0f2ee; margin-top:8px; padding-top:9px; font-size:13px; }
 .ws-order-card-total b{ font-size:16px; font-weight:800; color:var(--green-ink); }
+
+/* 도매 홈 — 히어로/혜택/가로스크롤/견적 */
+.ws-hero{ background:linear-gradient(140deg,#143E22 0%,#1C5230 52%,#2F7D45 100%); color:#fff; padding:22px 20px 24px; }
+.ws-hero-eyebrow{ font-size:10.5px; letter-spacing:2px; font-weight:800; opacity:.72; }
+.ws-hero h2{ font-size:24px; font-weight:800; line-height:1.22; letter-spacing:-.6px; margin:8px 0 10px; }
+.ws-hero p{ font-size:13px; line-height:1.65; opacity:.92; }
+.ws-hero p b{ font-weight:800; }
+.ws-benefits{ display:grid; grid-template-columns:1fr 1fr; gap:9px; margin:4px 0 2px; }
+.ws-benefit{ border:1px solid var(--line); border-radius:13px; padding:12px; background:#fff; }
+.ws-benefit-ic{ font-size:21px; }
+.ws-benefit b{ display:block; font-size:13px; font-weight:800; color:var(--green-ink); margin:6px 0 3px; }
+.ws-benefit em{ font-size:11px; color:var(--muted); font-style:normal; line-height:1.5; }
+.ws-hscroll{ display:flex; gap:11px; overflow-x:auto; padding:2px 16px 4px; -webkit-overflow-scrolling:touch; }
+.ws-hscroll::-webkit-scrollbar{ display:none; }
+.ws-hcard{ flex:0 0 132px; width:132px; text-decoration:none; color:var(--ink); }
+.ws-hcard-img{ width:132px; height:108px; border-radius:13px; overflow:hidden; background:#f6f8f5; display:grid; place-items:center; margin-bottom:7px; }
+.ws-hcard-img img{ width:100%; height:100%; object-fit:cover; }
+.ws-hcard b{ font-size:12.5px; font-weight:800; color:var(--green-ink); display:block; line-height:1.3; letter-spacing:-.2px; }
+.ws-card-tag{ position:absolute; top:7px; left:7px; background:#E5495B; color:#fff; font-size:10px; font-weight:800; padding:2px 7px; border-radius:7px; }
+.ws-card-img{ position:relative; }
+.ws-quote{ background:#0F2E19; color:#fff; border-radius:15px; padding:16px; display:flex; align-items:center; gap:12px; }
+.ws-quote b{ display:block; font-size:13.5px; font-weight:800; margin-bottom:4px; }
+.ws-quote span{ font-size:11.5px; opacity:.82; line-height:1.5; }
+.ws-quote-btn{ flex:none; background:#fff; color:var(--green-ink); font-size:12.5px; font-weight:800; padding:10px 14px; border-radius:10px; text-decoration:none; white-space:nowrap; }
+
+/* 도매 상세 — 가격박스/구간/안내 */
+.ws-detail-img{ position:relative; }
+.ws-detail-badge{ position:absolute; top:12px; left:12px; background:rgba(15,46,25,.85); color:#fff; font-size:11px; font-weight:800; padding:4px 10px; border-radius:8px; }
+.ws-pricebox{ border:1.5px solid var(--green2); border-radius:14px; padding:14px; margin-top:14px; background:#f6faf5; }
+.ws-pricebox-main{ display:flex; align-items:baseline; justify-content:space-between; }
+.ws-pricebox-main span{ font-size:12.5px; color:var(--muted); font-weight:700; }
+.ws-pricebox-main b{ font-size:28px; font-weight:800; color:var(--green-ink); letter-spacing:-1px; }
+.ws-pricebox-main b em{ font-size:15px; font-style:normal; margin-left:2px; }
+.ws-pricebox-sub{ font-size:12px; color:var(--muted); margin-top:6px; }
+.ws-pricebox-sub b{ color:var(--green2); font-weight:800; }
+.ws-pricebox-tags{ display:flex; gap:7px; margin-top:10px; }
+.ws-pricebox-tags span{ font-size:11.5px; font-weight:700; color:var(--green-ink); background:#fff; border:1px solid #d9e6dc; padding:4px 10px; border-radius:8px; }
+.ws-tier{ display:flex; align-items:center; gap:10px; padding:8px 0; border-bottom:1px solid #f0f2ee; }
+.ws-tier:last-of-type{ border-bottom:none; }
+.ws-tier-q{ flex:none; width:64px; font-size:12.5px; font-weight:800; color:var(--green-ink); }
+.ws-tier-p{ font-size:12.5px; color:var(--ink); }
+.ws-info-row{ padding:8px 0; border-bottom:1px solid #f0f2ee; }
+.ws-info-row:last-child{ border-bottom:none; }
+.ws-info-row b{ display:block; font-size:13px; font-weight:800; color:var(--green-ink); }
+.ws-info-row span{ font-size:12px; color:var(--muted); line-height:1.5; }
