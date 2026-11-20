@@ -18,6 +18,7 @@ export function MyMenu({ wishCount = 0, couponCount = 0 }) {
       <Link href="/my/wishlist"><Lead><IcHeart w={1.7} /></Lead>찜한 상품 {wishCount > 0 && <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700 }}>({wishCount})</span>}<Chev /></Link>
       <Link href="/my/coupons"><Lead><IcCoupon /></Lead>쿠폰함 {couponCount > 0 && <span style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 700 }}>({couponCount})</span>}<Chev /></Link>
       <Link href="/my/inquiry"><Lead><IcChat /></Lead>1:1 문의<Chev /></Link>
+      <Link href="/wholesale"><Lead>🏢</Lead>도매 사업자 전용관<Chev /></Link>
       <button
         style={{ color: 'var(--danger)' }}
         onClick={async () => { await fetch('/api/auth/logout', { method: 'POST' }); router.push('/'); router.refresh(); }}

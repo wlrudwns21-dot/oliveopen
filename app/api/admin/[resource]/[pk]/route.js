@@ -38,6 +38,11 @@ export async function PATCH(req, { params }) {
     }
   }
 
+  // 도매 사업자 승인 부수효과: 승인 시 approved_at 기록
+  if (params.resource === 'wholesale_account' && body.status === 'approved' && !data.approved_at) {
+    await sb.from('wholesale_account').update({ approved_at: new Date().toISOString() }).eq('pk', pk);
+  }
+
   // 어드민 승인 부수효과: 승인 시 역할 그룹 매핑 부여, 거절 시 그룹 제거
   if (params.resource === 'admin_request' && body.status) {
     const groupPk = ROLE_GROUP[data.requested_role] || ROLE_GROUP.operator;

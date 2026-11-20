@@ -9,6 +9,8 @@ const MENU = [
   { href: '/admin/orders', ico: '📦', label: '주문 관리' },
   { href: '/admin/returns', ico: '↩️', label: '반품 관리' },
   { href: '/admin/gift-orders', ico: '🎀', label: '추석 선물 신청' },
+  { href: '/admin/wholesale', ico: '🏢', label: '도매 회원 승인', perm: 'MANAGE_MEMBERS' },
+  { href: '/admin/wholesale-orders', ico: '🚚', label: '도매 주문' },
   { href: '/admin/products', ico: '🍊', label: '상품 관리' },
   { href: '/admin/categories', ico: '🗂️', label: '카테고리 관리' },
   { href: '/admin/seasonal', ico: '🗓️', label: '제철 캘린더' },

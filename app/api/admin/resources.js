@@ -25,6 +25,8 @@ export const RESOURCES = {
   event: { table: 'event', order: 'sort_order' },
   event_product: { table: 'event_product', order: 'sort_order', select: '*, product:product_pk(name, sku, price, emoji)' },
   gift_order: { table: 'gift_order', select: '*, member:member_pk(id, nick)' },
+  wholesale_account: { table: 'wholesale_account', perm: 'MANAGE_MEMBERS', select: '*, member:member_pk(id, nick)' },
+  wholesale_order: { table: 'wholesale_order', select: '*, item:wholesale_order_item(*), member:member_pk(id, nick)' },
 };
 
 // 역할 → member_group pk

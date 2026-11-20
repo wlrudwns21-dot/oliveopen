@@ -4,7 +4,7 @@ import { list, create, update, remove } from '@/lib/adminApi';
 import { won } from '@/lib/format';
 import ImageUploader from '@/components/admin/ImageUploader';
 
-const EMPTY = { sku: '', name: '', emoji: '', origin: '', sub_title: '', description: '', price: 0, original_price: '', status: 'active', badges: '[]', is_md_pick: false, category_pk: 1, sort_order: 0 };
+const EMPTY = { sku: '', name: '', emoji: '', origin: '', sub_title: '', description: '', price: 0, original_price: '', status: 'active', badges: '[]', is_md_pick: false, category_pk: 1, sort_order: 0, is_wholesale: false, wholesale_price: '', box_label: '', min_order_box: 1 };
 
 // product_image.storage_key(상대경로 또는 URL) → 화면에서 볼 수 있는 URL
 function toUrl(key) {
@@ -73,6 +73,10 @@ export default function AdminProducts() {
       original_price: first ? (first.original_price ? Number(first.original_price) : null) : (form.original_price ? Number(form.original_price) : null),
       status: form.status, badges, is_md_pick: !!form.is_md_pick,
       category_pk: form.category_pk ? Number(form.category_pk) : null, sort_order: Number(form.sort_order || 0),
+      is_wholesale: !!form.is_wholesale,
+      wholesale_price: form.wholesale_price ? Number(form.wholesale_price) : null,
+      box_label: form.box_label || null,
+      min_order_box: Number(form.min_order_box || 1),
     };
     try {
       let productPk = editing.pk;
@@ -180,6 +184,19 @@ export default function AdminProducts() {
               <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <input type="checkbox" checked={!!form.is_md_pick} onChange={(e) => set('is_md_pick', e.target.checked)} style={{ width: 'auto' }} /> MD's Pick 노출
               </label>
+            </div>
+
+            <div style={{ border: '1px solid var(--line)', borderRadius: 10, padding: '10px 12px', margin: '4px 0 12px', background: '#fafcf9' }}>
+              <label style={{ display: 'flex', gap: 8, alignItems: 'center', fontWeight: 700 }}>
+                <input type="checkbox" checked={!!form.is_wholesale} onChange={(e) => set('is_wholesale', e.target.checked)} style={{ width: 'auto' }} /> 🏢 도매 전용관 노출 (박스 단위 판매)
+              </label>
+              {form.is_wholesale && (
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 10 }}>
+                  <div className="field" style={{ marginBottom: 0 }}><label>박스 단가(원) *</label><input type="number" value={form.wholesale_price} onChange={(e) => set('wholesale_price', e.target.value)} placeholder="예: 42000" /></div>
+                  <div className="field" style={{ marginBottom: 0 }}><label>최소 주문 박스</label><input type="number" min={1} value={form.min_order_box} onChange={(e) => set('min_order_box', e.target.value)} /></div>
+                  <div className="field" style={{ marginBottom: 0, gridColumn: '1 / -1' }}><label>박스 규격</label><input value={form.box_label} onChange={(e) => set('box_label', e.target.value)} placeholder="예: 10kg / 박스, 5kg×2입" /></div>
+                </div>
+              )}
             </div>
 
             <label style={{ fontSize: 12, fontWeight: 700, color: 'var(--muted)' }}>옵션·가격 (첫 옵션 가격이 대표가로 저장돼요)</label>

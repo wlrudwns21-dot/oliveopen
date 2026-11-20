@@ -336,6 +336,21 @@ img{max-width:100%;}
 .pg-app .gift-add{ width:100%; padding:13px; border:1.5px dashed var(--green2); border-radius:13px; color:var(--green); font-weight:800; font-size:13.5px; background:rgba(47,125,69,.05); }
 .pg-app .gift-add:active{ background:rgba(47,125,69,.12); }
 
+/* 도매(B2B) 폼 */
+.pg-app .ws-note{ background:rgba(47,125,69,.07); border:1px solid var(--green2); color:#2b4a33; border-radius:12px; padding:11px 13px; font-size:12px; line-height:1.6; margin-bottom:14px; }
+.pg-app .ws-note b{ color:var(--green-ink); }
+.pg-app .ws-h{ font-size:14.5px; font-weight:800; margin-bottom:10px; }
+.pg-app .ws-cert-empty{ border:1.5px dashed #cdd8cc; border-radius:10px; padding:26px 10px; text-align:center; color:#9aa08c; font-size:12.5px; line-height:1.7; background:#fafcf9; }
+.pg-app .ws-cert-empty span{ font-size:11px; }
+.pg-app .ws-stepper{ display:flex; align-items:center; gap:8px; }
+.pg-app .ws-stepper button{ width:38px; height:40px; border:1px solid var(--line); border-radius:10px; background:#fff; font-size:20px; font-weight:700; color:var(--green-ink); flex:none; }
+.pg-app .ws-stepper input{ width:72px; flex:none; text-align:center; font-weight:800; }
+.pg-app .ws-stepper .ws-line{ margin-left:auto; font-size:13px; font-weight:800; color:var(--green-ink); }
+.pg-app .ws-sum{ margin-top:12px; }
+.pg-app .ws-sum>div{ display:flex; justify-content:space-between; align-items:center; padding:3px 0; }
+.pg-app .ws-sum>div span{ font-size:13px; color:var(--muted); font-weight:700; }
+.pg-app .ws-sum>div b{ font-size:15px; }
+
 /* 이벤트(특가) 히어로 */
 .pg-app .event-hero{ position:relative; margin:0; height:220px; overflow:hidden; display:flex; align-items:flex-end; color:#fff; }
 .pg-app .event-hero img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
