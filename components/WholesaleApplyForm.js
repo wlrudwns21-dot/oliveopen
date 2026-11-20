@@ -6,9 +6,11 @@ import AddressSearch from './AddressSearch';
 export default function WholesaleApplyForm({ loggedIn, existing }) {
   const [form, setForm] = useState({
     id: '', password: '', company_name: '', business_no: '', owner_name: '',
+    industry: '', manager_name: '',
     contact_phone: '', contact_email: '', zipcode: '', address: '', detail_address: '',
     cert_key: '', cert_preview: '',
   });
+  const INDUSTRIES = ['식당·외식', '카페·베이커리', '마트·슈퍼', '납품·도소매', '급식·단체', '기타'];
   const [searching, setSearching] = useState(false);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -102,7 +104,15 @@ export default function WholesaleApplyForm({ loggedIn, existing }) {
           <h3 className="ws-h">사업자 정보</h3>
           <div className="field"><label>상호(회사명) *</label><input value={form.company_name} onChange={set('company_name')} placeholder="예: 올리브청과" /></div>
           <div className="field"><label>사업자등록번호 *</label><input value={form.business_no} onChange={set('business_no')} inputMode="numeric" placeholder="000-00-00000" /></div>
+          <div className="field">
+            <label>업종</label>
+            <select value={form.industry} onChange={set('industry')}>
+              <option value="">업종 선택 (선택)</option>
+              {INDUSTRIES.map((x) => <option key={x} value={x}>{x}</option>)}
+            </select>
+          </div>
           <div className="field"><label>대표자명</label><input value={form.owner_name} onChange={set('owner_name')} /></div>
+          <div className="field"><label>담당자명</label><input value={form.manager_name} onChange={set('manager_name')} placeholder="주문 담당자 이름" /></div>
           <div className="field"><label>담당자 연락처</label><input value={form.contact_phone} onChange={set('contact_phone')} placeholder="010-0000-0000" /></div>
           <div className="field"><label>이메일</label><input value={form.contact_email} onChange={set('contact_email')} placeholder="tax@company.com" /></div>
         </div>

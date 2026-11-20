@@ -4,6 +4,7 @@ import { list, update } from '@/lib/adminApi';
 import { dt } from '@/lib/format';
 
 const ST = { pending: ['접수', 'st-orange'], approved: ['승인', 'st-green'], rejected: ['반려', 'st-red'] };
+const CR = { none: '미신청', pending: '여신 신청', approved: '여신 승인', rejected: '여신 반려' };
 
 export default function AdminWholesale() {
   const [rows, setRows] = useState(null);
@@ -21,6 +22,19 @@ export default function AdminWholesale() {
     if (status === 'rejected') { reject_reason = prompt('반려 사유 (선택)') ?? r.reject_reason; }
     try { await update('wholesale_account', r.pk, { status, reject_reason }); say(status === 'approved' ? '승인했어요' : '처리했어요'); setDetail(null); load(); }
     catch (e) { say(e.message); }
+  }
+
+  async function setCredit(r, status) {
+    let credit_limit = r.credit_limit || 0;
+    if (status === 'approved') {
+      const v = prompt('여신(세금계산서) 한도 — 원, 숫자만. 미정이면 0', String(r.credit_limit || 0));
+      if (v === null) return;
+      credit_limit = parseInt(String(v).replace(/[^0-9]/g, ''), 10) || 0;
+    }
+    try {
+      await update('wholesale_account', r.pk, { credit_status: status, credit_limit, credit_approved_at: status === 'approved' ? new Date().toISOString() : null });
+      say(status === 'approved' ? '여신을 승인했어요' : '여신을 처리했어요'); setDetail(null); load();
+    } catch (e) { say(e.message); }
   }
 
   return (
@@ -58,8 +72,10 @@ export default function AdminWholesale() {
               <b>사업자번호</b> {detail.business_no}<br />
               <b>대표자</b> {detail.owner_name || '-'}<br />
               <b>연락처</b> {detail.contact_phone || '-'} · {detail.contact_email || '-'}<br />
+              <b>업종</b> {detail.industry || '-'} · <b>담당자</b> {detail.manager_name || '-'}<br />
               <b>사업장</b> {detail.address || '-'} {detail.detail_address || ''}<br />
-              <b>계정</b> {detail.member?.id || '-'} · 신청 {dt(detail.created_at)}
+              <b>계정</b> {detail.member?.id || '-'} · 신청 {dt(detail.created_at)}<br />
+              <b>여신(세금계산서)</b> {CR[detail.credit_status || 'none']}{detail.credit_limit > 0 ? ` · 한도 ${detail.credit_limit.toLocaleString()}원` : ''}
               {detail.reject_reason ? <><br /><b>반려사유</b> {detail.reject_reason}</> : null}
             </p>
             {detail.cert_key
@@ -70,6 +86,14 @@ export default function AdminWholesale() {
               {detail.status !== 'rejected' && <button className="btn btn-sm" style={{ color: 'var(--danger)', border: '1px solid var(--line)' }} onClick={() => setStatus(detail, 'rejected')}>반려</button>}
               <button className="btn btn-line btn-sm" onClick={() => setDetail(null)}>닫기</button>
             </div>
+            {detail.status === 'approved' && (
+              <div className="modal-acts" style={{ marginTop: 8, borderTop: '1px solid var(--line)', paddingTop: 10 }}>
+                <span style={{ fontSize: 12, color: 'var(--muted)', alignSelf: 'center', marginRight: 'auto' }}>여신(세금계산서):</span>
+                {detail.credit_status !== 'approved' && <button className="btn btn-green btn-sm" onClick={() => setCredit(detail, 'approved')}>여신 승인</button>}
+                {detail.credit_status === 'approved' && <button className="btn btn-sm" style={{ color: 'var(--danger)', border: '1px solid var(--line)' }} onClick={() => setCredit(detail, 'rejected')}>여신 해제</button>}
+                {detail.credit_status === 'pending' && <button className="btn btn-sm" style={{ color: 'var(--danger)', border: '1px solid var(--line)' }} onClick={() => setCredit(detail, 'rejected')}>여신 반려</button>}
+              </div>
+            )}
           </div>
         </div>
       )}

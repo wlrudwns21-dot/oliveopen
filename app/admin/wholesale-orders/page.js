@@ -57,7 +57,9 @@ export default function AdminWholesaleOrders() {
           <div className="modal" style={{ maxWidth: 560 }}>
             <h3>도매주문 {detail.order_no}</h3>
             <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 10 }}>
-              {detail.member?.nick || detail.member?.id} · {detail.box_total}박스 · {won(detail.total)}원 · {dt(detail.created_at)}
+              {detail.member?.nick || detail.member?.id} · {detail.box_total}박스 · {won(detail.total)}원 · {dt(detail.created_at)}<br />
+              결제: <b style={{ color: detail.payment_method === 'tax_invoice' ? '#1f7a3d' : 'inherit' }}>{detail.payment_method === 'tax_invoice' ? '🧾 세금계산서(후불)' : '💳 일반 결제'}</b>
+              {detail.manager_name ? <> · 담당자 {detail.manager_name}</> : null}
               {detail.note ? <><br />메모: {detail.note}</> : null}
             </p>
             <table className="atable" style={{ fontSize: 12.5 }}>

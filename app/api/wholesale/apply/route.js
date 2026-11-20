@@ -44,6 +44,7 @@ export async function POST(req) {
     contact_email: b.contact_email?.trim() || null,
     zipcode: b.zipcode || null, address: b.address?.trim() || null, detail_address: b.detail_address?.trim() || null,
     cert_key: b.cert_key, status: 'pending',
+    industry: b.industry?.trim() || null, manager_name: b.manager_name?.trim() || null,
   });
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ ok: true, logged_in: !!sess?.pk });
