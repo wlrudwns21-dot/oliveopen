@@ -85,8 +85,14 @@ export default function WholesaleApplyForm({ loggedIn, existing }) {
         <div className="ws-note">사업자등록증 인증 후 <b>관리자 승인</b>을 거치면 도매 전용관에서 <b>박스 단위·복수 배송지</b> 주문을 이용하실 수 있어요.</div>
 
         {!loggedIn && (
+          <div style={{ textAlign: 'center', fontSize: 13, color: 'var(--muted)', margin: '-2px 0 14px' }}>
+            이미 도매 회원이신가요? <a href="/wholesale" style={{ fontWeight: 800, color: 'var(--green2)', textDecoration: 'none' }}>도매 회원 로그인 →</a>
+          </div>
+        )}
+
+        {!loggedIn && (
           <div className="infocard">
-            <h3 className="ws-h">로그인 정보</h3>
+            <h3 className="ws-h">도매 계정 만들기</h3>
             <div className="field"><label>아이디 *</label><input value={form.id} onChange={set('id')} autoComplete="username" placeholder="도매 계정 아이디" /></div>
             <div className="field"><label>비밀번호 (8자 이상) *</label><input type="password" value={form.password} onChange={set('password')} autoComplete="new-password" /></div>
           </div>
